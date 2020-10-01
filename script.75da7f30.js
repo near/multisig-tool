@@ -22550,6 +22550,21 @@ window.onload = function () {
   });
 };
 
+function getAccounts() {
+  var accountIds = window.localStorage.getItem('accounts');
+
+  if (accountIds) {
+    return accountIds.split(',');
+  }
+
+  return [];
+}
+
+function setAccounts(accountIds) {
+  console.log(accountIds);
+  window.localStorage.setItem('accounts', accountIds.join(','));
+}
+
 function loadAccounts() {
   return _loadAccounts.apply(this, arguments);
 }
@@ -22561,53 +22576,45 @@ function _loadAccounts() {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            accountIds = window.localStorage.getItem('accounts');
+            accountIds = getAccounts();
             console.log("Accounts: ".concat(accountIds));
             accounts = [];
-
-            if (!accountIds) {
-              _context2.next = 18;
-              break;
-            }
-
-            accountIds = accountIds.split(',');
-            console.log(accountIds);
             i = 0;
 
-          case 7:
+          case 4:
             if (!(i < accountIds.length)) {
-              _context2.next = 18;
+              _context2.next = 15;
               break;
             }
 
-            _context2.next = 10;
+            _context2.next = 7;
             return window.near.account(accountIds[i]);
 
-          case 10:
+          case 7:
             account = _context2.sent;
-            _context2.next = 13;
+            _context2.next = 10;
             return account.state();
 
-          case 13:
+          case 10:
             state = _context2.sent;
             accounts.push({
               accountId: accountIds[i],
               amount: nearAPI.utils.format.formatNearAmount(state.amount, 2)
             });
 
-          case 15:
+          case 12:
             ++i;
-            _context2.next = 7;
+            _context2.next = 4;
             break;
 
-          case 18:
+          case 15:
             console.log(accounts);
             template = document.getElementById('template1').innerHTML;
             document.getElementById('accounts').innerHTML = _mustache.default.render(template, {
               accounts: accounts
             });
 
-          case 21:
+          case 18:
           case "end":
             return _context2.stop();
         }
@@ -22630,22 +22637,20 @@ function _addAccount() {
           case 0:
             accountId = document.querySelector('#account').value;
             console.log("Adding ".concat(accountId));
-            accountIds = window.localStorage.getItem('accounts');
+            accountIds = getAccounts();
 
-            if (accountIds) {
-              accountIds += ',' + accountId;
-            } else {
-              accountIds = accountId;
+            if (!accountIds.includes(accountId)) {
+              accountIds.push(accountId);
+              setAccounts(accountIds);
             }
 
-            window.localStorage.setItem('accounts', accountIds);
-            _context3.next = 7;
+            _context3.next = 6;
             return loadAccounts();
 
-          case 7:
+          case 6:
             window.hash = accountId;
 
-          case 8:
+          case 7:
           case "end":
             return _context3.stop();
         }
@@ -22661,36 +22666,61 @@ function loadAccountDetails(_x) {
 
 function _loadAccountDetails() {
   _loadAccountDetails = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(accountId) {
-    var contract, request_ids, requests, i, details, template;
+    var accountIds, contract, numConfirmations, accessKeys, request_ids, requests, i, details, template;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _context4.next = 2;
+            document.getElementById('requests').innerHTML = 'loading';
+            accountIds = getAccounts();
+
+            if (accountIds.includes(accountId)) {
+              _context4.next = 7;
+              break;
+            }
+
+            accountIds.push(accountId);
+            setAccounts(accountIds);
+            _context4.next = 7;
+            return loadAccounts();
+
+          case 7:
+            _context4.next = 9;
             return window.near.account(accountId);
 
-          case 2:
+          case 9:
             contract = _context4.sent;
-            _context4.next = 5;
+            _context4.next = 12;
+            return contract.viewFunction(accountId, "get_num_confirmations", {});
+
+          case 12:
+            numConfirmations = _context4.sent;
+            _context4.next = 15;
+            return contract.getAccessKeys();
+
+          case 15:
+            accessKeys = _context4.sent;
+            console.log(accessKeys);
+            _context4.next = 19;
             return contract.viewFunction(accountId, "list_request_ids", {});
 
-          case 5:
+          case 19:
             request_ids = _context4.sent;
             requests = [];
             i = 0;
 
-          case 8:
+          case 22:
             if (!(i < request_ids.length)) {
-              _context4.next = 16;
+              _context4.next = 30;
               break;
             }
 
-            _context4.next = 11;
+            _context4.next = 25;
             return contract.viewFunction(accountId, "get_request", {
               request_id: request_ids[i]
             });
 
-          case 11:
+          case 25:
             details = _context4.sent;
             requests.push({
               request_id: request_ids[i],
@@ -22698,19 +22728,22 @@ function _loadAccountDetails() {
               actions: JSON.stringify(details.actions)
             });
 
-          case 13:
+          case 27:
             ++i;
-            _context4.next = 8;
+            _context4.next = 22;
             break;
 
-          case 16:
+          case 30:
             console.log(requests);
             template = document.getElementById('template2').innerHTML;
             document.getElementById('requests').innerHTML = _mustache.default.render(template, {
+              accountId: accountId,
+              accessKeys: accessKeys,
+              numConfirmations: numConfirmations,
               requests: requests
             });
 
-          case 19:
+          case 33:
           case "end":
             return _context4.stop();
         }
@@ -22720,8 +22753,21 @@ function _loadAccountDetails() {
   return _loadAccountDetails.apply(this, arguments);
 }
 
+function confirmRequest(accountId, requestId) {
+  console.log("Confirm ".concat(accountId, " request ").concat(requestId));
+  alert("Doesn't work yet");
+}
+
+function submitRequest(requestKind) {
+  alert("Doesn't work yet");
+
+  if (requestKind == "add_key") {}
+}
+
 window.nearAPI = nearAPI;
 window.addAccount = addAccount;
+window.confirmRequest = confirmRequest;
+window.submitRequest = submitRequest;
 
 window.onhashchange = function () {
   if (window.location.hash) {
@@ -22756,7 +22802,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49936" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49877" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

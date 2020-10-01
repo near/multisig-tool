@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Multisig Tool</title><link rel="stylesheet" href="style.2484efd3.css"><script src="script.5f34420b.js" defer></script></head><body> <h1>Tool to manage multisigs</h1> <p>This is temporary until NEAR Wallet adds this functionality</p> <script id="template1" type="x-tmpl-mustache">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Multisig Tool</title><link rel="stylesheet" href="style.2484efd3.css"><script src="script.3eb5de26.js" defer></script></head><body> <h1>Tool to manage multisigs</h1> <p>This is temporary until NEAR Wallet adds this functionality</p> <script id="template1" type="x-tmpl-mustache">
       <ul>
         {{#accounts}}
             <li><a href="#{{ accountId }}">{{ accountId }}</a> {{ amount }}</li>
@@ -7,9 +7,26 @@
       <input id="account" />
       <button onclick="addAccount()">Add account</button>
     </script> <div id="accounts"></div> <script id="template2" type="x-tmpl-mustache">
-          <ul>
-            {{#requests}}
-                <li>{{ request_id }} {{ receiver_id }} {{ actions }}</li>
-            {{/requests}}
-          </ul>
-        </script> <div id="requests"></div> </body></html>
+        <h2>{{ accountId }}</h2>
+        <p>Num confirmations: {{ numConfirmations }}</p>
+        <p>Keys</p>
+        <ul>
+        {{#accessKeys}}
+          <li>{{ public_key }}</li>
+        {{/accessKeys}}
+        </ul>
+        <h3>Requests</h3>
+        <table>
+          {{#requests}}
+            <tr>
+              <td>{{ request_id }}</td>
+              <td>{{ receiver_id }}</td>
+              <td>{{ actions }}</td>
+              <td><button onclick="confirmRequest('{{ accountId }}', {{ request_id }})">Confirm</button></td>
+            </tr>
+          {{/requests}}
+        </table>
+        <h3>Actions</h3>
+        <p>Add new key:</p>
+        <input id="new-key" /><button onclick="submitRequest('add_key')">Add key</button>
+    </script> <div id="requests"></div> </body></html>
