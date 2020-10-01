@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Multisig Tool</title>
+    
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.e308ff8e.css">
+    
+    <!-- import the webpage's javascript file -->
+    <script src="/script.75da7f30.js" defer=""></script>
+  <script src="/style.e308ff8e.js"></script></head>  
+  <body>
+    <h1>Tool to manage multisigs</h1>
+    <p>This is temporary until NEAR Wallet adds this functionality</p>
+    
+    <script id="template1" type="x-tmpl-mustache">
+      <ul>
+        {{#accounts}}
+            <li><a href="#{{ accountId }}">{{ accountId }}</a> {{ amount }}</li>
+        {{/accounts}}
+      </ul>
+      <input id="account" />
+      <button onclick="addAccount()">Add account</button>
+    </script>
+
+    <div id="accounts"></div>
+
+    <script id="template2" type="x-tmpl-mustache">
+          <ul>
+            {{#requests}}
+                <li>{{ request_id }} {{ receiver_id }} {{ actions }}</li>
+            {{/requests}}
+          </ul>
+        </script>
+    <div id="requests"></div>
+  </body>
+</html>
