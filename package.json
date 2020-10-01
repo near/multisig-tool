@@ -3,15 +3,17 @@
     "node": ">= 12"
   },
   "dependencies": {
+    "@ledgerhq/hw-transport-u2f": "^5.22.0",
     "bs58": "^4.0.1",
     "js-sha256": "^0.9.0",
     "mustache": "^4.0.1",
     "near-api-js": "^0.29.1",
+    "near-ledger-js": "^0.1.2",
     "parcel-bundler": "^1.12.4",
     "readline-sync": "^1.4.10"
   },
   "scripts": {
-    "start": "parcel index.html",
+    "start": "parcel index.html --https",
     "build": "parcel build index.html --public-url ./",
     "deploy": "npm run build; yarn gh-pages -d dist"
   },
