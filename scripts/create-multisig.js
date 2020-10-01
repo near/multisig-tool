@@ -34,20 +34,37 @@ async function createKeyStore() {
     return new nearAPI.keyStores.MergeKeyStore(keyStores);
 }
 
-async function deployMultisig(masterAccount, accountId, keys, amount, numConfirmations) {
+async function deployMultisig(masterAccount, accountId, keys, amount, numConfirmations, deployNew) {
     const code = fs.readFileSync(MULTISIG_WASM_PATH);
     const args = { "num_confirmations": parseInt(numConfirmations) };
     const methodNames = ["add_request", "delete_request", "confirm"];
-    let actions = [
-        nearAPI.transactions.createAccount(),
-        nearAPI.transactions.transfer(nearAPI.utils.format.parseNearAmount(amount)),
-        nearAPI.transactions.deployContract(code)];
+    let actions = [];
+    if (deployNew) {
+        actions.push(nearAPI.transactions.createAccount());
+    }
+    if (amount > 0) {
+        actions.push(nearAPI.transactions.transfer(nearAPI.utils.format.parseNearAmount(amount)));
+    }
+    actions.push(nearAPI.transactions.deployContract(code));
     actions = actions.concat(keys.map((key) => nearAPI.transactions.addKey(
         nearAPI.utils.PublicKey.from(key),
         nearAPI.transactions.functionCallAccessKey(accountId, methodNames, null)
     )));
     actions.push(nearAPI.transactions.functionCall('new', args, '100000000000000'));
     await masterAccount.signAndSendTransaction(accountId, actions);
+}
+
+async function accountExists(connection, accountId) {
+    try {
+        const account = new nearAPI.Account(connection, accountId);
+        await account.state();
+        return true;
+    } catch (error) {
+        if (!error.message.includes('does not exist while viewing')) {
+            throw error;
+        }
+        return false;
+    }
 }
 
 (async () => {
@@ -65,12 +82,19 @@ async function deployMultisig(masterAccount, accountId, keys, amount, numConfirm
         if (!key) break;
         keys.push(key);
     }
-    const amount = reader.question('Amount: ');
+    let deployNew = true;
+    if (await accountExists(near.connection, accountId)) {
+        deployNew = false;
+    }
+    let amount = 0;
+    if (deployNew) {
+        amount = reader.question('Amount: ');
+    }
     const numConfirmations = reader.question('Number of confirmations: ');
     
     masterAccount = await near.account(masterAccountId);
 
-    console.log(`"${masterAccount.accountId}" deploying ${numConfirmations} of ${keys.length} multisig at "${accountId}" with ${amount}N.`);
+    console.log(`"${masterAccount.accountId}" deploying ${numConfirmations} of ${keys.length} multisig at "${accountId}" (${deployNew ? "New" : "Existing"}) with ${amount}N.`);
     console.log(`List of keys: ${keys}`);
 
     const confirm = reader.question('Confirm [Y/n]: ');
@@ -79,5 +103,5 @@ async function deployMultisig(masterAccount, accountId, keys, amount, numConfirm
         return;
     }
 
-    await deployMultisig(masterAccount, accountId, keys, amount, numConfirmations);
+    await deployMultisig(masterAccount, accountId, keys, amount, numConfirmations, deployNew);
 })().catch(e => { console.error(e); process.exit(1); });
