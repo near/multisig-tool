@@ -90,10 +90,13 @@ async function loadAccountDetails(accountId) {
     let requests = [];
     for (let i = 0; i < request_ids.length; ++i) {
         let details = await contract.viewFunction(accountId, "get_request", { request_id: request_ids[i] });
+        let confirms = await contract.viewFunction(accountId, "get_confirmations", { request_id: request_ids[i] });
         requests.push({ 
             request_id: request_ids[i], 
             receiver_id: details.receiver_id,
             actions: JSON.stringify(details.actions),
+            numConfirms: confirms.length,
+            confirms: confirms,
          });
     }
     console.log(requests);
@@ -111,7 +114,7 @@ async function setAccountSigner(contract) {
     console.log(accessKeys);
     let { publicKey, path } = await findPath(accessKeys.map(({ public_key }) => public_key));
     if (path == null) {
-        alert(`Ledger path not found. Make sure to add it first`);
+        alert(`Ledger path not found. Make sure to add it first in "Keys" section`);
         throw new Error(`No key found`);
     }
     console.log(`Found ${publicKey} at ${path}`);
@@ -134,26 +137,76 @@ async function setAccountSigner(contract) {
 async function confirmRequest(accountId, requestId) {
     console.log(`Confirm ${accountId} request ${requestId}`);
     let contract = await window.near.account(accountId);
-    await setAccountSigner(contract);
-    await contract.functionCall(accountId, 'confirm', { request_id: requestId });
+    try {
+        await setAccountSigner(contract);
+        await contract.functionCall(accountId, 'confirm', { request_id: requestId });
+    } catch (error) {
+        console.log(error);
+        alert(error);
+    }
+    loadAccountDetails(accountId);
+}
+
+async function deleteRequest(accountId, requestId) {
+    console.log(`Delete ${accountId} request ${requestId}`);
+    let contract = await window.near.account(accountId);
+    try {
+        await setAccountSigner(contract);
+        await contract.functionCall(accountId, 'delete_request', { request_id: requestId });
+    } catch (error) {
+        console.log(error);
+        alert(error);
+    }
+    loadAccountDetails(accountId);
 }
 
 async function submitRequest(accountId, requestKind) {
     let contract = await window.near.account(accountId);
-    await setAccountSigner(contract);
-    if (requestKind == "add_key") {
-
-    } else if (requestKind == "transfer") {
-        let receiverId = document.querySelector('#transfer-receiver').value;
-        let amount = document.querySelector('#transfer-amount').value;
-        console.log(`Send from ${accountId} to ${receiverId} ${amount}`);
-        await contract.functionCall(accountId, 'add_request', { request: {
-            receiver_id: receiverId,
-            actions: [
-                { type: "Transfer", amount: nearAPI.utils.format.parseNearAmount(amount) }
-            ]
-        } });
+    try {
+        await setAccountSigner(contract);
+        if (requestKind == "add_key") {
+            alert("Doesnt' work yet");
+        } else if (requestKind == "transfer") {
+            let receiverId = document.querySelector('#transfer-receiver').value;
+            let amount = document.querySelector('#transfer-amount').value;
+            console.log(`Send from ${accountId} to ${receiverId} ${amount}`);
+            await contract.functionCall(accountId, 'add_request', { request: {
+                receiver_id: receiverId,
+                actions: [
+                    { type: "Transfer", amount: nearAPI.utils.format.parseNearAmount(amount) }
+                ]
+            } });
+        } else if (requestKind = "num_confirmations") {
+            let numConfirmations = document.querySelector('#num-confirmations').value;
+            try {
+                numConfirmations = parseInt(numConfirmations);
+            } catch (error) {
+                alert(error);
+                return;
+            }
+            const accessKeys = await contract.getAccessKeys();
+            console.log(`Change ${accountId} to ${numConfirmations} of ${accessKeys.length} multisig`);
+            if (numConfirmations + 1 > accessKeys.length) {
+                alert(`Dangerously high number of confirmations. Set lower or add more keys`);
+                return;
+            }
+            if (numConfirmations < 1) {
+                alert('Min num confirmations is 1');
+                return;
+            }
+            await contract.functionCall(accountId, 'add_request', { request: {
+                receiver_id: accountId,
+                actions: [
+                    { type: "SetNumConfirmations", num_confirmations: numConfirmations }
+                ]
+            }});
+        }
+    } catch (error) {
+        console.log(error);
+        alert(error);
     }
+
+    await loadAccountDetails(accountId);
 }
 
 async function loadKeys() {
@@ -202,6 +255,7 @@ async function addPath() {
 window.nearAPI = nearAPI;
 window.addAccount = addAccount;
 window.confirmRequest = confirmRequest;
+window.deleteRequest = deleteRequest;
 window.submitRequest = submitRequest;
 window.addPath = addPath;
 
