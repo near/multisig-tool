@@ -24611,7 +24611,7 @@ function loadAccountDetails(_x) {
 
 function _loadAccountDetails() {
   _loadAccountDetails = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(accountId) {
-    var accountIds, contract, numConfirmations, accessKeys, request_ids, requests, i, details, template;
+    var accountIds, contract, numConfirmations, accessKeys, request_ids, requests, i, details, confirms, template;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -24656,7 +24656,7 @@ function _loadAccountDetails() {
 
           case 22:
             if (!(i < request_ids.length)) {
-              _context4.next = 30;
+              _context4.next = 33;
               break;
             }
 
@@ -24667,18 +24667,27 @@ function _loadAccountDetails() {
 
           case 25:
             details = _context4.sent;
+            _context4.next = 28;
+            return contract.viewFunction(accountId, "get_confirmations", {
+              request_id: request_ids[i]
+            });
+
+          case 28:
+            confirms = _context4.sent;
             requests.push({
               request_id: request_ids[i],
               receiver_id: details.receiver_id,
-              actions: JSON.stringify(details.actions)
+              actions: JSON.stringify(details.actions),
+              numConfirms: confirms.length,
+              confirms: confirms
             });
 
-          case 27:
+          case 30:
             ++i;
             _context4.next = 22;
             break;
 
-          case 30:
+          case 33:
             console.log(requests);
             template = document.getElementById('template2').innerHTML;
             document.getElementById('requests').innerHTML = _mustache.default.render(template, {
@@ -24688,7 +24697,7 @@ function _loadAccountDetails() {
               requests: requests
             });
 
-          case 33:
+          case 36:
           case "end":
             return _context4.stop();
         }
@@ -24732,7 +24741,7 @@ function _setAccountSigner() {
               break;
             }
 
-            alert("Ledger path not found. Make sure to add it first");
+            alert("Ledger path not found. Make sure to add it first in \"Keys\" section");
             throw new Error("No key found");
 
           case 12:
@@ -24815,63 +24824,129 @@ function _confirmRequest() {
 
           case 3:
             contract = _context8.sent;
-            _context8.next = 6;
+            _context8.prev = 4;
+            _context8.next = 7;
             return setAccountSigner(contract);
 
-          case 6:
-            _context8.next = 8;
+          case 7:
+            _context8.next = 9;
             return contract.functionCall(accountId, 'confirm', {
               request_id: requestId
             });
 
-          case 8:
+          case 9:
+            _context8.next = 15;
+            break;
+
+          case 11:
+            _context8.prev = 11;
+            _context8.t0 = _context8["catch"](4);
+            console.log(_context8.t0);
+            alert(_context8.t0);
+
+          case 15:
+            loadAccountDetails(accountId);
+
+          case 16:
           case "end":
             return _context8.stop();
         }
       }
-    }, _callee8);
+    }, _callee8, null, [[4, 11]]);
   }));
   return _confirmRequest.apply(this, arguments);
 }
 
-function submitRequest(_x5, _x6) {
-  return _submitRequest.apply(this, arguments);
+function deleteRequest(_x5, _x6) {
+  return _deleteRequest.apply(this, arguments);
 }
 
-function _submitRequest() {
-  _submitRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(accountId, requestKind) {
-    var contract, receiverId, amount;
+function _deleteRequest() {
+  _deleteRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(accountId, requestId) {
+    var contract;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            _context9.next = 2;
+            console.log("Delete ".concat(accountId, " request ").concat(requestId));
+            _context9.next = 3;
+            return window.near.account(accountId);
+
+          case 3:
+            contract = _context9.sent;
+            _context9.prev = 4;
+            _context9.next = 7;
+            return setAccountSigner(contract);
+
+          case 7:
+            _context9.next = 9;
+            return contract.functionCall(accountId, 'delete_request', {
+              request_id: requestId
+            });
+
+          case 9:
+            _context9.next = 15;
+            break;
+
+          case 11:
+            _context9.prev = 11;
+            _context9.t0 = _context9["catch"](4);
+            console.log(_context9.t0);
+            alert(_context9.t0);
+
+          case 15:
+            loadAccountDetails(accountId);
+
+          case 16:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9, null, [[4, 11]]);
+  }));
+  return _deleteRequest.apply(this, arguments);
+}
+
+function submitRequest(_x7, _x8) {
+  return _submitRequest.apply(this, arguments);
+}
+
+function _submitRequest() {
+  _submitRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10(accountId, requestKind) {
+    var contract, receiverId, amount, numConfirmations, accessKeys;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            _context10.next = 2;
             return window.near.account(accountId);
 
           case 2:
-            contract = _context9.sent;
-            _context9.next = 5;
+            contract = _context10.sent;
+            _context10.prev = 3;
+            _context10.next = 6;
             return setAccountSigner(contract);
 
-          case 5:
+          case 6:
             if (!(requestKind == "add_key")) {
-              _context9.next = 8;
+              _context10.next = 10;
               break;
             }
 
-            _context9.next = 14;
+            alert("Doesnt' work yet");
+            _context10.next = 40;
             break;
 
-          case 8:
+          case 10:
             if (!(requestKind == "transfer")) {
-              _context9.next = 14;
+              _context10.next = 18;
               break;
             }
 
             receiverId = document.querySelector('#transfer-receiver').value;
             amount = document.querySelector('#transfer-amount').value;
             console.log("Send from ".concat(accountId, " to ").concat(receiverId, " ").concat(amount));
-            _context9.next = 14;
+            _context10.next = 16;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: receiverId,
@@ -24882,12 +24957,85 @@ function _submitRequest() {
               }
             });
 
-          case 14:
+          case 16:
+            _context10.next = 40;
+            break;
+
+          case 18:
+            if (!(requestKind = "num_confirmations")) {
+              _context10.next = 40;
+              break;
+            }
+
+            numConfirmations = document.querySelector('#num-confirmations').value;
+            _context10.prev = 20;
+            numConfirmations = parseInt(numConfirmations);
+            _context10.next = 28;
+            break;
+
+          case 24:
+            _context10.prev = 24;
+            _context10.t0 = _context10["catch"](20);
+            alert(_context10.t0);
+            return _context10.abrupt("return");
+
+          case 28:
+            _context10.next = 30;
+            return contract.getAccessKeys();
+
+          case 30:
+            accessKeys = _context10.sent;
+            console.log("Change ".concat(accountId, " to ").concat(numConfirmations, " of ").concat(accessKeys.length, " multisig"));
+
+            if (!(numConfirmations + 1 > accessKeys.length)) {
+              _context10.next = 35;
+              break;
+            }
+
+            alert("Dangerously high number of confirmations. Set lower or add more keys");
+            return _context10.abrupt("return");
+
+          case 35:
+            if (!(numConfirmations < 1)) {
+              _context10.next = 38;
+              break;
+            }
+
+            alert('Min num confirmations is 1');
+            return _context10.abrupt("return");
+
+          case 38:
+            _context10.next = 40;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: accountId,
+                actions: [{
+                  type: "SetNumConfirmations",
+                  num_confirmations: numConfirmations
+                }]
+              }
+            });
+
+          case 40:
+            _context10.next = 46;
+            break;
+
+          case 42:
+            _context10.prev = 42;
+            _context10.t1 = _context10["catch"](3);
+            console.log(_context10.t1);
+            alert(_context10.t1);
+
+          case 46:
+            _context10.next = 48;
+            return loadAccountDetails(accountId);
+
+          case 48:
           case "end":
-            return _context9.stop();
+            return _context10.stop();
         }
       }
-    }, _callee9);
+    }, _callee10, null, [[3, 42], [20, 24]]);
   }));
   return _submitRequest.apply(this, arguments);
 }
@@ -24897,11 +25045,11 @@ function loadKeys() {
 }
 
 function _loadKeys() {
-  _loadKeys = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
+  _loadKeys = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee11() {
     var keys, template;
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+    return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
             keys = getKeys();
             template = document.getElementById('template-keys').innerHTML;
@@ -24918,31 +25066,31 @@ function _loadKeys() {
 
           case 3:
           case "end":
-            return _context10.stop();
+            return _context11.stop();
         }
       }
-    }, _callee10);
+    }, _callee11);
   }));
   return _loadKeys.apply(this, arguments);
 }
 
-function findPath(_x7) {
+function findPath(_x9) {
   return _findPath.apply(this, arguments);
 }
 
 function _findPath() {
-  _findPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee11(accessKeys) {
+  _findPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12(accessKeys) {
     var keys, i, publicKey;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+    return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             keys = getKeys();
             i = 0;
 
           case 2:
             if (!(i < keys.length)) {
-              _context11.next = 11;
+              _context12.next = 11;
               break;
             }
 
@@ -24950,7 +25098,7 @@ function _findPath() {
             console.log(accessKeys, publicKey, accessKeys.includes(publicKey));
 
             if (!accessKeys.includes(publicKey)) {
-              _context11.next = 8;
+              _context12.next = 8;
               break;
             }
 
@@ -24958,28 +25106,28 @@ function _findPath() {
               publicKey: publicKey,
               path: keys[i].path
             });
-            return _context11.abrupt("return", {
+            return _context12.abrupt("return", {
               publicKey: publicKey,
               path: keys[i].path
             });
 
           case 8:
             ++i;
-            _context11.next = 2;
+            _context12.next = 2;
             break;
 
           case 11:
-            return _context11.abrupt("return", {
+            return _context12.abrupt("return", {
               publicKey: null,
               path: null
             });
 
           case 12:
           case "end":
-            return _context11.stop();
+            return _context12.stop();
         }
       }
-    }, _callee11);
+    }, _callee12);
   }));
   return _findPath.apply(this, arguments);
 }
@@ -24989,25 +25137,25 @@ function addPath() {
 }
 
 function _addPath() {
-  _addPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12() {
+  _addPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee13() {
     var keys, path, client, publicKey;
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+    return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
-        switch (_context12.prev = _context12.next) {
+        switch (_context13.prev = _context13.next) {
           case 0:
             keys = getKeys();
             path = document.querySelector('#path').value;
-            _context12.prev = 2;
-            _context12.next = 5;
+            _context13.prev = 2;
+            _context13.next = 5;
             return (0, _ledger.createLedgerU2FClient)();
 
           case 5:
-            client = _context12.sent;
-            _context12.next = 8;
+            client = _context13.sent;
+            _context13.next = 8;
             return client.getPublicKey(path);
 
           case 8:
-            publicKey = _context12.sent;
+            publicKey = _context13.sent;
             console.log(path, publicKey);
             keys.push({
               publicKey: publicKey,
@@ -25015,21 +25163,21 @@ function _addPath() {
             });
             setKeys(keys);
             loadKeys();
-            _context12.next = 19;
+            _context13.next = 19;
             break;
 
           case 15:
-            _context12.prev = 15;
-            _context12.t0 = _context12["catch"](2);
-            document.getElementById('keys').innerHTML = _context12.t0;
-            console.log(_context12.t0);
+            _context13.prev = 15;
+            _context13.t0 = _context13["catch"](2);
+            document.getElementById('keys').innerHTML = _context13.t0;
+            console.log(_context13.t0);
 
           case 19:
           case "end":
-            return _context12.stop();
+            return _context13.stop();
         }
       }
-    }, _callee12, null, [[2, 15]]);
+    }, _callee13, null, [[2, 15]]);
   }));
   return _addPath.apply(this, arguments);
 }
@@ -25037,6 +25185,7 @@ function _addPath() {
 window.nearAPI = nearAPI;
 window.addAccount = addAccount;
 window.confirmRequest = confirmRequest;
+window.deleteRequest = deleteRequest;
 window.submitRequest = submitRequest;
 window.addPath = addPath;
 
@@ -25073,7 +25222,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56437" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50535" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Multisig Tool</title><link rel="stylesheet" href="style.2484efd3.css"><script src="script.a0a8bd03.js" defer></script></head><body> <h1>Tool to manage multisigs</h1> <p>This is temporary until NEAR Wallet adds this functionality</p> <script id="template-keys" type="x-tmpl-mustache">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Multisig Tool</title><link rel="stylesheet" href="style.2484efd3.css"><script src="script.1d784c06.js" defer></script></head><body> <h1>Tool to manage multisigs</h1> <p>This is temporary until NEAR Wallet adds this functionality</p> <script id="template-keys" type="x-tmpl-mustache">
       <ul>
         {{#keys}}
             <li>{{ publicKey }} {{ path }}</li>
@@ -25,12 +25,23 @@
         </ul>
         <h3>Requests</h3>
         <table>
+            <tr>
+              <td>Id</td>
+              <td>Receiver</td>
+              <td># conf</td>
+              <td>Actions</td>
+              <td>Confirm/Delete</td>
+            </tr>
           {{#requests}}
             <tr>
               <td>{{ request_id }}</td>
               <td>{{ receiver_id }}</td>
+              <td>{{ numConfirms }}</td>
               <td>{{ actions }}</td>
-              <td><button onclick="confirmRequest('{{ accountId }}', {{ request_id }})">Confirm</button></td>
+              <td>
+                <button onclick="confirmRequest('{{ accountId }}', {{ request_id }})">Confirm</button>
+                <button onclick="deleteRequest('{{ accountId }}', {{ request_id }})">Delete</button>
+              </td>
             </tr>
           {{/requests}}
         </table>
@@ -39,4 +50,6 @@
         <input id="new-key" /><button onclick="submitRequest('{{ accountId }}', 'add_key')">Add key</button>
         <p>Transfer:</p>
         <input id="transfer-receiver" placeholder="Receiver" /><input id="transfer-amount" placeholder="Amount"><button onclick="submitRequest('{{ accountId }}', 'transfer')">Transfer</button>
+        <p>Change number of confirmations:</p>
+        <input id="num-confirmations" placeholder="Number of confirmations" /><button onclick="submitRequest('{{ accountId }}', 'num_confirmations')">Change</button>
     </script> <div id="requests"></div> </body></html>
