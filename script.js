@@ -25,6 +25,19 @@ window.onload = () => {
     })().catch(e => console.error(e));
 };
 
+async function accountExists(connection, accountId) {
+    try {
+        const account = new nearAPI.Account(connection, accountId);
+        await account.state();
+        return true;
+    } catch (error) {
+        if (!error.message.includes('does not exist while viewing')) {
+            throw error;
+        }
+        return false;
+    }
+}
+
 function getAccounts() {
     let accountIds = window.localStorage.getItem('accounts');
     return accountIds ? accountIds.split(',') : [];
@@ -48,12 +61,16 @@ async function loadAccounts() {
     console.log(`Accounts: ${accountIds}`);
     let accounts = [];
     for (let i = 0; i < accountIds.length; ++i) {
-        const account = await window.near.account(accountIds[i]);
-        const state = await account.state();
-        accounts.push({ 
-            accountId: accountIds[i],
-            amount: nearAPI.utils.format.formatNearAmount(state.amount, 2)
-        });
+        try {
+            const account = await window.near.account(accountIds[i]);
+            const state = await account.state();
+            accounts.push({
+                accountId: accountIds[i],
+                amount: nearAPI.utils.format.formatNearAmount(state.amount, 2)
+            });
+        } catch (error) {
+            console.log(error);
+        }
     }
     console.log(accounts);
     const template = document.getElementById('template1').innerHTML;
@@ -91,10 +108,29 @@ async function loadAccountDetails(accountId) {
     for (let i = 0; i < request_ids.length; ++i) {
         let details = await contract.viewFunction(accountId, "get_request", { request_id: request_ids[i] });
         let confirms = await contract.viewFunction(accountId, "get_confirmations", { request_id: request_ids[i] });
+        let repr = [];
+        for (let i = 0; i < details.actions.length; ++i) {
+            let action = details.actions[i];
+            switch (action.type) {
+                case 'Transfer':
+                    repr.push(`Transfer ${nearAPI.utils.format.formatNearAmount(action.amount, 2)}N`);
+                    break;
+                case 'FunctionCall':
+                    repr.push(`Call ${action.method_name}(${atob(action.args)}), attach ${nearAPI.utils.format.formatNearAmount(action.deposit, 2)}N with ${parseInt(action.gas) / 1000000000000}Tg`);
+                    break;
+                case 'SetNumConfirmations':
+                    repr.push(`Set number of confirmations = ${action.num_confirmations}`);
+                    break;
+                default:
+                    repr.push(JSON.stringify(action));
+                    break;
+            }
+        }
         requests.push({ 
             request_id: request_ids[i], 
             receiver_id: details.receiver_id,
             actions: JSON.stringify(details.actions),
+            repr,
             numConfirms: confirms.length,
             confirms: confirms,
          });
@@ -139,7 +175,7 @@ async function confirmRequest(accountId, requestId) {
     let contract = await window.near.account(accountId);
     try {
         await setAccountSigner(contract);
-        await contract.functionCall(accountId, 'confirm', { request_id: requestId });
+        await contract.functionCall(accountId, 'confirm', { request_id: requestId }, '150000000000000');
     } catch (error) {
         console.log(error);
         alert(error);
@@ -160,14 +196,45 @@ async function deleteRequest(accountId, requestId) {
     loadAccountDetails(accountId);
 }
 
+function funcCall(methodName, args, deposit, gas) {
+    return {
+        "type": "FunctionCall",
+        "method_name": methodName,
+        "args": btoa(JSON.stringify(args)),
+        "deposit": deposit ? deposit : '0',
+        "gas": gas ? gas : '100000000000000'
+    };
+}
+
 async function submitRequest(accountId, requestKind) {
     let contract = await window.near.account(accountId);
     try {
         await setAccountSigner(contract);
         if (requestKind == "add_key") {
-            alert("Doesnt' work yet");
+            let publicKeyStr = document.querySelector('#new-key').value;
+            // check it's a valid key.
+            let publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
+            console.log(`Add ${publicKey.toString()} key`);
+            await contract.functionCall(accountId, 'add_request', { request: {
+                receiver_id: accountId,
+                actions: [
+                    { 
+                        type: "AddKey", 
+                        public_key: publicKey.toString().replace('ed25519:', ''), 
+                        permission: { 
+                            allowance: null,
+                            receiver_id: accountId,
+                            method_names: ['add_request', 'add_request_and_confirm', 'confirm', 'delete_request'],
+                        }
+                    }
+                ]
+            }})
         } else if (requestKind == "transfer") {
             let receiverId = document.querySelector('#transfer-receiver').value;
+            if (!await accountExists(window.near.connection, receiverId)) {
+                alert(`Account ${receiverId} doesn't exist`);
+                return;
+            }
             let amount = document.querySelector('#transfer-amount').value;
             console.log(`Send from ${accountId} to ${receiverId} ${amount}`);
             await contract.functionCall(accountId, 'add_request', { request: {
@@ -176,7 +243,7 @@ async function submitRequest(accountId, requestKind) {
                     { type: "Transfer", amount: nearAPI.utils.format.parseNearAmount(amount) }
                 ]
             } });
-        } else if (requestKind = "num_confirmations") {
+        } else if (requestKind == "num_confirmations") {
             let numConfirmations = document.querySelector('#num-confirmations').value;
             try {
                 numConfirmations = parseInt(numConfirmations);
@@ -200,6 +267,35 @@ async function submitRequest(accountId, requestKind) {
                     { type: "SetNumConfirmations", num_confirmations: numConfirmations }
                 ]
             }});
+        } else if (requestKind == "terminate_vesting" || requestKind == "termination_withdraw") {
+            let lockupAccountId = document.querySelector('#lockup-account-id').value;
+            if (!await accountExists(window.near.connection, lockupAccountId)) {
+                alert(`Account ${lockupAccountId} doesn't exist`);
+                return;
+            }
+            const lockupAccount = await window.near.account(lockupAccountId);
+            console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
+            if (requestKind == "terminate_vesting") {
+                await contract.functionCall(accountId, 'add_request', {
+                    request: {
+                        receiver_id: lockupAccountId,
+                        actions: [
+                            funcCall("terminate_vesting", {})
+                        ]
+                    }
+                });
+            } else if (requestKind == "termination_withdraw") {
+                await contract.functionCall(accountId, 'add_request', {
+                    request: {
+                        receiver_id: lockupAccountId,
+                        actions: [
+                            funcCall("termination_withdraw", { receiver_id: accountId })
+                        ]
+                    }
+                });
+            }
+        } else {
+            alert(`Unkonwn request kind: ${requestKind}`);
         }
     } catch (error) {
         console.log(error);
