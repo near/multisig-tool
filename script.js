@@ -345,6 +345,12 @@ async function findPath(accessKeys) {
 }
 
 async function addPath() {
+  const btn = document.querySelector('#addPathBtn');
+  btn.disabled = true;
+  btn.innerHTML='<div class="spinner-grow spinner-grow-sm" role="status">\n' +
+    '  <span class="sr-only">Loading...</span>\n' +
+    '</div>&nbsp;&nbsp;&nbsp;Checking ledger';
+  document.getElementById('keysError').innerHTML = '';
   let keys = getKeys();
   let path = document.querySelector('#path').value;
   try {
@@ -356,10 +362,14 @@ async function addPath() {
       path
     });
     setKeys(keys);
-    loadKeys();
+    await loadKeys();
+    btn.innerHTML = "add";
+    btn.disabled = false;
   } catch (error) {
     document.getElementById('keysError').innerHTML = error;
     console.log(error);
+    btn.innerHTML = "add";
+    btn.disabled = false;
   }
 }
 
