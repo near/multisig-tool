@@ -250,6 +250,31 @@
           <hr />
           <br />
 
+          <p>Create account</p>
+
+          <div class="row mb-4">
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="num-confirmations" placeholder="Account name" />
+                <label class="form-label" for="num-confirmations">Account name</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="num-confirmations" placeholder="Public key" />
+                <label class="form-label" for="num-confirmations">Public key</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 text-left justify-content-left">
+              <div>
+                <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }} ', 'create_account')">Create account</button>
+              </div>
+            </div>
+          </div>
+
+          <hr />
+          <br />
+
           <p>Vesting termination:</p>
 
           <div class="row mb-4 justify-content-left">
@@ -268,6 +293,27 @@
 
         </div>
       </div>
+      </script>
+
+      <script id="template-staking" type="x-tmpl-mustache">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Account: {{ accountId }}</h5>
+            <p class="card-text">
+            </p>
+
+            <div>
+              <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
+                <option></option>
+                {{#pools}}
+                  <option value="{{ accountId }}">{{ accountId }} -- {{ fee }} -- {{ stake }}</option>
+                {{/pools}}
+              </select>
+              <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+            </div>
+
+          </div>
+        </div>
       </script>
 
       <div id="requests"></div>

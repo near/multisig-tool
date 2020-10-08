@@ -7,6 +7,8 @@ import {encode, decode} from 'bs58';
 import Mustache from 'mustache';
 
 import {createLedgerU2FClient} from './ledger.js'
+import * as actions from './actions.js'
+import { loadAccountStaking } from './staking.js'
 
 const options = {
   nodeUrl: 'https://rpc.mainnet.near.org',
@@ -20,23 +22,10 @@ window.onload = () => {
     await loadKeys();
     await loadAccounts();
     if (window.location.hash) {
-      await loadAccountDetails(window.location.hash.slice(1));
+      await display(window.location.hash.slice(1));
     }
   })().catch(e => console.error(e));
 };
-
-async function accountExists(connection, accountId) {
-  try {
-    const account = new nearAPI.Account(connection, accountId);
-    await account.state();
-    return true;
-  } catch (error) {
-    if (!error.message.includes('does not exist while viewing')) {
-      throw error;
-    }
-    return false;
-  }
-}
 
 function getAccounts() {
   let accountIds = window.localStorage.getItem('accounts');
@@ -75,7 +64,6 @@ async function loadAccounts() {
     }
   }
 
-
   console.log(accounts);
   const template = document.getElementById('template1').innerHTML;
   document.getElementById('accounts').innerHTML = Mustache.render(template, {
@@ -93,6 +81,22 @@ async function addAccount() {
   }
   await loadAccounts();
   window.hash = accountId;
+}
+
+async function display(path) {
+  let accountId = path, kind = 'details';
+  if (path.includes('/')) {
+    [accountId, kind] = path.split('/');
+  }
+  switch (kind) {
+    case 'staking':
+      await loadAccountStaking(accountId);
+      break;
+    case 'details':
+    default:
+      await loadAccountDetails(accountId);
+      break;
+  }
 }
 
 async function loadAccountDetails(accountId) {
@@ -154,36 +158,11 @@ async function loadAccountDetails(accountId) {
   });
 }
 
-async function setAccountSigner(contract) {
-  const accessKeys = await contract.getAccessKeys();
-  console.log(accessKeys);
-  let {publicKey, path} = await findPath(accessKeys.map(({public_key}) => public_key));
-  if (path == null) {
-    alert(`Ledger path not found. Make sure to add it first in "Keys" section`);
-    throw new Error(`No key found`);
-  }
-  console.log(`Found ${publicKey} at ${path}`);
-
-  const client = await createLedgerU2FClient();
-  publicKey = nearAPI.utils.PublicKey.fromString(publicKey);
-  let signer = {
-    async getPublicKey() {
-      return publicKey;
-    },
-    async signMessage(message) {
-      const signature = await client.sign(message, path);
-      return {signature, publicKey};
-    }
-  }
-
-  contract.connection.signer = signer;
-}
-
 async function confirmRequest(accountId, requestId) {
   console.log(`Confirm ${accountId} request ${requestId}`);
   let contract = await window.near.account(accountId);
   try {
-    await setAccountSigner(contract);
+    await actions.setAccountSigner(contract);
     await contract.functionCall(accountId, 'confirm', {request_id: requestId}, '150000000000000');
   } catch (error) {
     console.log(error);
@@ -196,7 +175,7 @@ async function deleteRequest(accountId, requestId) {
   console.log(`Delete ${accountId} request ${requestId}`);
   let contract = await window.near.account(accountId);
   try {
-    await setAccountSigner(contract);
+    await actions.setAccountSigner(contract);
     await contract.functionCall(accountId, 'delete_request', {request_id: requestId});
   } catch (error) {
     console.log(error);
@@ -205,118 +184,8 @@ async function deleteRequest(accountId, requestId) {
   loadAccountDetails(accountId);
 }
 
-function funcCall(methodName, args, deposit, gas) {
-  return {
-    "type": "FunctionCall",
-    "method_name": methodName,
-    "args": btoa(JSON.stringify(args)),
-    "deposit": deposit ? deposit : '0',
-    "gas": gas ? gas : '100000000000000'
-  };
-}
-
 async function submitRequest(accountId, requestKind) {
-  let contract = await window.near.account(accountId);
-  try {
-    await setAccountSigner(contract);
-    if (requestKind === "add_key") {
-      let publicKeyStr = document.querySelector('#new-key').value;
-      // check it's a valid key.
-      let publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
-      console.log(`Add ${publicKey.toString()} key`);
-      await contract.functionCall(accountId, 'add_request', {
-        request: {
-          receiver_id: accountId,
-          actions: [
-            {
-              type: "AddKey",
-              public_key: publicKey.toString().replace('ed25519:', ''),
-              permission: {
-                allowance: null,
-                receiver_id: accountId,
-                method_names: ['add_request', 'add_request_and_confirm', 'confirm', 'delete_request'],
-              }
-            }
-          ]
-        }
-      })
-    } else if (requestKind === "transfer") {
-      let receiverId = document.querySelector('#transfer-receiver').value;
-      if (!await accountExists(window.near.connection, receiverId)) {
-        alert(`Account ${receiverId} doesn't exist`);
-        return;
-      }
-      let amount = document.querySelector('#transfer-amount').value;
-      console.log(`Send from ${accountId} to ${receiverId} ${amount}`);
-      await contract.functionCall(accountId, 'add_request', {
-        request: {
-          receiver_id: receiverId,
-          actions: [
-            {type: "Transfer", amount: nearAPI.utils.format.parseNearAmount(amount)}
-          ]
-        }
-      });
-    } else if (requestKind === "num_confirmations") {
-      let numConfirmations = document.querySelector('#num-confirmations').value;
-      try {
-        numConfirmations = parseInt(numConfirmations);
-      } catch (error) {
-        alert(error);
-        return;
-      }
-      const accessKeys = await contract.getAccessKeys();
-      console.log(`Change ${accountId} to ${numConfirmations} of ${accessKeys.length} multisig`);
-      if (numConfirmations + 1 > accessKeys.length) {
-        alert(`Dangerously high number of confirmations. Set lower or add more keys`);
-        return;
-      }
-      if (numConfirmations < 1) {
-        alert('Min num confirmations is 1');
-        return;
-      }
-      await contract.functionCall(accountId, 'add_request', {
-        request: {
-          receiver_id: accountId,
-          actions: [
-            {type: "SetNumConfirmations", num_confirmations: numConfirmations}
-          ]
-        }
-      });
-    } else if (requestKind === "terminate_vesting" || requestKind === "termination_withdraw") {
-      let lockupAccountId = document.querySelector('#lockup-account-id').value;
-      if (!await accountExists(window.near.connection, lockupAccountId)) {
-        alert(`Account ${lockupAccountId} doesn't exist`);
-        return;
-      }
-      const lockupAccount = await window.near.account(lockupAccountId);
-      console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
-      if (requestKind === "terminate_vesting") {
-        await contract.functionCall(accountId, 'add_request', {
-          request: {
-            receiver_id: lockupAccountId,
-            actions: [
-              funcCall("terminate_vesting", {})
-            ]
-          }
-        });
-      } else if (requestKind === "termination_withdraw") {
-        await contract.functionCall(accountId, 'add_request', {
-          request: {
-            receiver_id: lockupAccountId,
-            actions: [
-              funcCall("termination_withdraw", {receiver_id: accountId})
-            ]
-          }
-        });
-      }
-    } else {
-      alert(`Unkonwn request kind: ${requestKind}`);
-    }
-  } catch (error) {
-    console.log(error);
-    alert(error);
-  }
-
+  await actions.submitRequest(accountId, requestKind);
   await loadAccountDetails(accountId);
 }
 
@@ -382,6 +251,6 @@ window.addPath = addPath;
 
 window.onhashchange = () => {
   if (window.location.hash) {
-    loadAccountDetails(window.location.hash.slice(1));
+    display(window.location.hash.slice(1));
   }
 }
