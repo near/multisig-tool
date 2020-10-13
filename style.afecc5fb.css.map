@@ -1,0 +1,1 @@
+{"version":3,"sources":["style.css"],"names":[],"mappings":"AAEA,KACI,wBAA2B,CAC3B,cACJ","file":"style.afecc5fb.css","sourceRoot":"..","sourcesContent":["/* CSS files add styling rules to your content */\n\nbody {\n    background-color: aliceblue;\n    margin-top: 1em;\n}\n\n"]}

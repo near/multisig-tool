@@ -24559,7 +24559,7 @@ function loadAccounts() {
 
 function _loadAccounts() {
   _loadAccounts = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-    var accountIds, accounts, i, account, state, template;
+    var accountIds, accounts, path, i, account, state, template;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -24567,55 +24567,57 @@ function _loadAccounts() {
             accountIds = getAccounts();
             console.log("Accounts: ".concat(accountIds));
             accounts = [];
+            path = document.querySelector('#path').value;
             i = 0;
 
-          case 4:
+          case 5:
             if (!(i < accountIds.length)) {
-              _context3.next = 21;
+              _context3.next = 22;
               break;
             }
 
-            _context3.prev = 5;
-            _context3.next = 8;
+            _context3.prev = 6;
+            _context3.next = 9;
             return window.near.account(accountIds[i]);
 
-          case 8:
+          case 9:
             account = _context3.sent;
-            _context3.next = 11;
+            _context3.next = 12;
             return account.state();
 
-          case 11:
+          case 12:
             state = _context3.sent;
             accounts.push({
               accountId: accountIds[i],
-              amount: nearAPI.utils.format.formatNearAmount(state.amount, 2)
+              amount: nearAPI.utils.format.formatNearAmount(state.amount, 2) //active: (accountIds[i] === path) ? 'active' : '',
+
             });
-            _context3.next = 18;
+            _context3.next = 19;
             break;
 
-          case 15:
-            _context3.prev = 15;
-            _context3.t0 = _context3["catch"](5);
+          case 16:
+            _context3.prev = 16;
+            _context3.t0 = _context3["catch"](6);
             console.log(_context3.t0);
 
-          case 18:
+          case 19:
             ++i;
-            _context3.next = 4;
+            _context3.next = 5;
             break;
 
-          case 21:
+          case 22:
             console.log(accounts);
             template = document.getElementById('template1').innerHTML;
             document.getElementById('accounts').innerHTML = _mustache.default.render(template, {
               accounts: accounts
             });
 
-          case 24:
+          case 25:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[5, 15]]);
+    }, _callee3, null, [[6, 16]]);
   }));
   return _loadAccounts.apply(this, arguments);
 }
@@ -24668,7 +24670,7 @@ function _loadAccountDetails() {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            document.getElementById('requests').innerHTML = 'loading';
+            document.getElementById('requests').innerHTML = '<div class="text-center"><div class="spinner-border" role="status">\n' + '        <span class="sr-only">Loading...</span>\n' + '      </div></div><br>';
             accountIds = getAccounts();
 
             if (accountIds.includes(accountId)) {
@@ -24785,8 +24787,11 @@ function _loadAccountDetails() {
               numConfirmations: numConfirmations,
               requests: requests
             });
+            document.querySelectorAll('.form-outline').forEach(function (formOutline) {
+              new window.mdb.Input(formOutline).init();
+            });
 
-          case 54:
+          case 55:
           case "end":
             return _context5.stop();
         }
@@ -25027,7 +25032,7 @@ function _submitRequest() {
             return setAccountSigner(contract);
 
           case 6:
-            if (!(requestKind == "add_key")) {
+            if (!(requestKind === "add_key")) {
               _context11.next = 14;
               break;
             }
@@ -25057,7 +25062,7 @@ function _submitRequest() {
             break;
 
           case 14:
-            if (!(requestKind == "transfer")) {
+            if (!(requestKind === "transfer")) {
               _context11.next = 27;
               break;
             }
@@ -25094,7 +25099,7 @@ function _submitRequest() {
             break;
 
           case 27:
-            if (!(requestKind == "num_confirmations")) {
+            if (!(requestKind === "num_confirmations")) {
               _context11.next = 51;
               break;
             }
@@ -25153,7 +25158,7 @@ function _submitRequest() {
             break;
 
           case 51:
-            if (!(requestKind == "terminate_vesting" || requestKind == "termination_withdraw")) {
+            if (!(requestKind === "terminate_vesting" || requestKind === "termination_withdraw")) {
               _context11.next = 72;
               break;
             }
@@ -25179,7 +25184,7 @@ function _submitRequest() {
             lockupAccount = _context11.sent;
             console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
 
-            if (!(requestKind == "terminate_vesting")) {
+            if (!(requestKind === "terminate_vesting")) {
               _context11.next = 67;
               break;
             }
@@ -25197,7 +25202,7 @@ function _submitRequest() {
             break;
 
           case 67:
-            if (!(requestKind == "termination_withdraw")) {
+            if (!(requestKind === "termination_withdraw")) {
               _context11.next = 70;
               break;
             }
@@ -25341,23 +25346,27 @@ function addPath() {
 
 function _addPath() {
   _addPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee14() {
-    var keys, path, client, publicKey;
+    var btn, keys, path, client, publicKey;
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
           case 0:
+            btn = document.querySelector('#addPathBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner-grow spinner-grow-sm" role="status">\n' + '  <span class="sr-only">Loading...</span>\n' + '</div>&nbsp;&nbsp;&nbsp;Checking ledger';
+            document.getElementById('keysError').innerHTML = '';
             keys = getKeys();
             path = document.querySelector('#path').value;
-            _context14.prev = 2;
-            _context14.next = 5;
+            _context14.prev = 6;
+            _context14.next = 9;
             return (0, _ledger.createLedgerU2FClient)();
 
-          case 5:
+          case 9:
             client = _context14.sent;
-            _context14.next = 8;
+            _context14.next = 12;
             return client.getPublicKey(path);
 
-          case 8:
+          case 12:
             publicKey = _context14.sent;
             console.log(path, publicKey);
             keys.push({
@@ -25365,22 +25374,29 @@ function _addPath() {
               path: path
             });
             setKeys(keys);
-            loadKeys();
-            _context14.next = 19;
+            _context14.next = 18;
+            return loadKeys();
+
+          case 18:
+            btn.innerHTML = "add";
+            btn.disabled = false;
+            _context14.next = 28;
             break;
 
-          case 15:
-            _context14.prev = 15;
-            _context14.t0 = _context14["catch"](2);
-            document.getElementById('keys').innerHTML = _context14.t0;
+          case 22:
+            _context14.prev = 22;
+            _context14.t0 = _context14["catch"](6);
+            document.getElementById('keysError').innerHTML = _context14.t0;
             console.log(_context14.t0);
+            btn.innerHTML = "add";
+            btn.disabled = false;
 
-          case 19:
+          case 28:
           case "end":
             return _context14.stop();
         }
       }
-    }, _callee14, null, [[2, 15]]);
+    }, _callee14, null, [[6, 22]]);
   }));
   return _addPath.apply(this, arguments);
 }
@@ -25425,7 +25441,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58320" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55804" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
