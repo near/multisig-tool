@@ -6,9 +6,10 @@ import * as nearAPI from 'near-api-js';
 import {encode, decode} from 'bs58';
 import Mustache from 'mustache';
 
-import {createLedgerU2FClient} from './ledger.js'
+import { createLedgerU2FClient } from './ledger.js'
 import * as actions from './actions.js'
 import { loadAccountStaking } from './staking.js'
+import * as utils from './utils.js';
 
 const options = {
   nodeUrl: 'https://rpc.mainnet.near.org',
@@ -34,15 +35,6 @@ function getAccounts() {
 
 function setAccounts(accountIds) {
   window.localStorage.setItem('accounts', accountIds.join(','));
-}
-
-function getKeys() {
-  let keys = window.localStorage.getItem('keys');
-  return keys ? JSON.parse(keys) : [];
-}
-
-function setKeys(keys) {
-  window.localStorage.setItem('keys', JSON.stringify(keys));
 }
 
 async function loadAccounts() {
@@ -190,7 +182,7 @@ async function submitRequest(accountId, requestKind) {
 }
 
 async function loadKeys() {
-  let keys = getKeys();
+  let keys = utils.getKeys();
   const template = document.getElementById('template-keys').innerHTML;
   document.getElementById('keys').innerHTML = Mustache.render(template, {
     keys: keys.map(({publicKey, path}) => ({
@@ -200,19 +192,6 @@ async function loadKeys() {
   });
 }
 
-async function findPath(accessKeys) {
-  let keys = getKeys();
-  for (let i = 0; i < keys.length; ++i) {
-    let publicKey = 'ed25519:' + encode(Buffer.from(keys[i].publicKey));
-    console.log(accessKeys, publicKey, accessKeys.includes(publicKey));
-    if (accessKeys.includes(publicKey)) {
-      console.log({publicKey, path: keys[i].path});
-      return {publicKey, path: keys[i].path};
-    }
-  }
-  return {publicKey: null, path: null};
-}
-
 async function addPath() {
   const btn = document.querySelector('#addPathBtn');
   btn.disabled = true;
@@ -220,7 +199,7 @@ async function addPath() {
     '  <span class="sr-only">Loading...</span>\n' +
     '</div>&nbsp;&nbsp;&nbsp;Checking ledger';
   document.getElementById('keysError').innerHTML = '';
-  let keys = getKeys();
+  let keys = utils.getKeys();
   let path = document.querySelector('#path').value;
   try {
     const client = await createLedgerU2FClient();
