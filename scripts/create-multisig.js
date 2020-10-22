@@ -3,6 +3,7 @@ const homedir = require('os').homedir();
 const path = require('path');
 const fs = require('fs');
 const reader = require("readline-sync");
+const { deployMultisig } = require("../multisig.js");
 
 const config = {
     mainnet: {
@@ -32,26 +33,6 @@ async function createKeyStore() {
         new nearAPI.keyStores.UnencryptedFileSystemKeyStore(PROJECT_KEY_DIR)
     ];
     return new nearAPI.keyStores.MergeKeyStore(keyStores);
-}
-
-async function deployMultisig(masterAccount, accountId, keys, amount, numConfirmations, deployNew) {
-    const code = fs.readFileSync(MULTISIG_WASM_PATH);
-    const args = { "num_confirmations": parseInt(numConfirmations) };
-    const methodNames = ["add_request", "delete_request", "confirm"];
-    let actions = [];
-    if (deployNew) {
-        actions.push(nearAPI.transactions.createAccount());
-    }
-    if (amount > 0) {
-        actions.push(nearAPI.transactions.transfer(nearAPI.utils.format.parseNearAmount(amount)));
-    }
-    actions.push(nearAPI.transactions.deployContract(code));
-    actions = actions.concat(keys.map((key) => nearAPI.transactions.addKey(
-        nearAPI.utils.PublicKey.from(key),
-        nearAPI.transactions.functionCallAccessKey(accountId, methodNames, null)
-    )));
-    actions.push(nearAPI.transactions.functionCall('new', args, '100000000000000'));
-    await masterAccount.signAndSendTransaction(accountId, actions);
 }
 
 async function accountExists(connection, accountId) {
@@ -98,8 +79,8 @@ async function accountExists(connection, accountId) {
     console.log(`List of keys: ${keys}`);
 
     const confirm = reader.question('Confirm [Y/n]: ');
-    if (confirm != 'Y' && confirm != '') {
-        console.log('Cancelling creation');
+    if (confirm != 'Y') {
+        console.log('Cancelling creation, select Y to continue');
         return;
     }
 
