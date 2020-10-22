@@ -229,6 +229,7 @@ window.submitRequest = submitRequest;
 window.addPath = addPath;
 
 window.onhashchange = () => {
+  console.log(window.location.hash);
   if (window.location.hash) {
     display(window.location.hash.slice(1));
   }

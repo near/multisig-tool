@@ -191,4 +191,5 @@ async function submitRequest(accountId, requestKind) {
 module.exports = {
     setAccountSigner,
     submitRequest,
+    funcCall
 }

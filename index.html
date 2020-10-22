@@ -144,6 +144,7 @@
       <br>
 
       <script id="template2" type="x-tmpl-mustache">
+      <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}/staking'">Staking</button>
       <div class="card">
         <div class="card-body">
         <h5 class="card-title">Account: {{ accountId }}</h5>
@@ -294,6 +295,7 @@
           <hr />
           <br />
 
+          <!--
           <p>Create new multisig account:</p>
 
           <div class="row mb-4 justify-content-left">
@@ -343,11 +345,13 @@
             </div>
           </div>
 
+          -->
         </div>
       </div>
       </script>
 
       <script id="template-staking" type="x-tmpl-mustache">
+      <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}'">Back</button>
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Account: {{ accountId }}</h5>
@@ -364,6 +368,26 @@
               <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
             </div>
 
+            <div class="col-12 col-lg-6 text-left justify-content-center">
+              <table>
+                <tr>
+                  <td>Pool Id</td>
+                  <td>Staked</td>
+                  <td>Unstaked</td>
+                </tr>
+                {{#staking}}
+                  <tr>
+                    <td>{{ poolId }}</td>
+                    <td>{{ totalStaked }}</td>
+                    <td>{{ totalUnstaked }}</td>
+                    <td>
+                      <button type="button" class="btn btn-primary" onclick='unstakeAll("{{ accountId }}", "{{ poolId }}")'>Unstake all</button>
+                      <button type="button" class="btn btn-danger" onclick='withdrawAll("{{ accountId }}", "{{ poolId }}")'>Withdraw all</button>
+                    </td>
+                  </tr>
+                {{/staking}}
+              </table>
+            </div>
           </div>
         </div>
       </script>
