@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.ae947d09.js" defer></script></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.012f2d65.js" defer></script></head><body>
 <div class="container fluid"> <div class="row"> <div class="col-md-8 col-xs-12 mx-auto"> <div class="card"> <div class="card-body"> <h2 class="card-title text-center">Tool to manage multisigs</h2> <hr> <p class="mb-0 text-center"> This is temporary until NEAR Wallet adds this functionality </p> </div> </div> <br> <div class="card"> <div class="card-body"> <h5 class="card-title">Keys</h5> <p class="card-text"> <ul class="list-group list-group-flush"> <script id="template-keys" type="x-tmpl-mustache">
               {{#keys}}
                   <li class="list-group-item"> <input class="form-check-input mr-1" type="checkbox" value="" aria-label="{{ publicKey }}
@@ -11,6 +11,7 @@
                   <li class="list-group-item {{ active }}"> <a href="#{{ accountId }}">{{ accountId }}</a> {{ amount }}</li>
               {{/accounts}}
             </script> </ul> </p> <div class="row mb-4"> <div class="col d-flex w-100"> <div class="form-outline mb-4 w-100"> <input class="form-control" type="text" id="account"> <label class="form-label" for="account">Enter account</label> </div> </div> <div class="col"> <div> <button type="button" class="btn btn-primary" onclick="addAccount()">Add</button> </div> </div> </div> </div> </div> <br> <script id="template2" type="x-tmpl-mustache">
+      <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}/staking'">Staking</button>
       <div class="card">
         <div class="card-body">
         <h5 class="card-title">Account: {{ accountId }}</h5>
@@ -82,8 +83,8 @@
             </div>
             <div class="col d-flex w-100">
               <div class="form-outline mb-4 w-100">
-                <input class="form-control" type="text" id="transfer-amount" placeholder="Amount">
-                <label class="form-label" for="transfer-amount">Enter amount</label>
+                <input class="form-control" type="text" id="transfer-amount" placeholder="Amount in NEAR">
+                <label class="form-label" for="transfer-amount">Amount in NEAR</label>
               </div>
             </div>
             <div class="col">
@@ -115,6 +116,31 @@
           <hr />
           <br />
 
+          <p>Create account</p>
+
+          <div class="row mb-4">
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="create-account-name" placeholder="Account name" />
+                <label class="form-label" for="create-account-name">Account name</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="create-account-public-key" placeholder="Public key" />
+                <label class="form-label" for="create-account-public-key">Public key</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 text-left justify-content-left">
+              <div>
+                <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }} ', 'create_account')">Create account</button>
+              </div>
+            </div>
+          </div>
+
+          <hr />
+          <br />
+
           <p>Vesting termination:</p>
 
           <div class="row mb-4 justify-content-left">
@@ -131,7 +157,100 @@
             </div>
           </div>
 
+          <hr />
+          <br />
+
+          <p>Create new multisig account:</p>
+
+          <div class="row mb-4 justify-content-left">
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="multisig-account-id" placeholder="Account Id" />
+                <label class="form-label" for="multisig-account-id">Account Id</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 text-left justify-content-center">
+                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
+            </div>
+          </div>
+
+          <hr />
+          <br />
+
+          <p>Deploy lockup:</p>
+
+          <div class="row mb-4 justify-content-left">
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="create-lockup-account-id" placeholder="Owner account for lockup contract" />
+                <label class="form-label" for="create-lockup-account-id">Owner account for lockup contract</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="create-lockup-amount" placeholder="Lockup amount in NEAR" />
+                <label class="form-label" for="create-lockup-amount">Lockup amount in NEAR</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="create-lockup-duration" placeholder="Lockup duration (in days)" />
+                <label class="form-label" for="create-lockup-duration">Lockup duration (in days)</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 d-flex">
+              <div class="form-outline mb-4 w-100">
+                <input type="checkbox" id="create-lockup-staking" placeholder="" checked />
+                <label for="create-lockup-staking">Enable staking</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-6 text-left justify-content-center">
+                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
+            </div>
+          </div>
+
+          -->
         </div>
       </div>
+      </script> <script id="template-staking" type="x-tmpl-mustache">
+      <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}'">Back</button>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Account: {{ accountId }}</h5>
+            <p class="card-text">
+            </p>
+
+            <div>
+              <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
+                <option></option>
+                {{#pools}}
+                  <option value="{{ accountId }}">{{ accountId }} -- {{ fee }} -- {{ stake }}</option>
+                {{/pools}}
+              </select>
+              <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+            </div>
+
+            <div class="col-12 col-lg-6 text-left justify-content-center">
+              <table>
+                <tr>
+                  <td>Pool Id</td>
+                  <td>Staked</td>
+                  <td>Unstaked</td>
+                </tr>
+                {{#staking}}
+                  <tr>
+                    <td>{{ poolId }}</td>
+                    <td>{{ totalStaked }}</td>
+                    <td>{{ totalUnstaked }}</td>
+                    <td>
+                      <button type="button" class="btn btn-primary" onclick='unstakeAll("{{ accountId }}", "{{ poolId }}")'>Unstake all</button>
+                      <button type="button" class="btn btn-danger" onclick='withdrawAll("{{ accountId }}", "{{ poolId }}")'>Withdraw all</button>
+                    </td>
+                  </tr>
+                {{/staking}}
+              </table>
+            </div>
+          </div>
+        </div>
       </script> <div id="requests"></div> <footer class="bg-light text-center text-lg-left">  <div class="text-center p-3" style="background-color:rgba(0,0,0,.2);"> © 2020 Copyright: <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a> </div>  </footer> </div> </div>
 </div> </body></html><script>document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".form-outline").forEach(function(n){new window.mdb.Input(n).init()})});</script>

@@ -19271,6 +19271,7 @@ class JsonRpcProvider extends provider_1.Provider {
         };
         const response = await web_1.fetchJson(this.connection, JSON.stringify(request));
         if (response.error) {
+            console.log(response.error);
             if (typeof response.error.data === 'object') {
                 if (typeof response.error.data.error_message === 'string' && typeof response.error.data.error_type === 'string') {
                     // if error data has error_message and error_type properties, we consider that node returned an error in the old format
@@ -24424,7 +24425,1186 @@ function _createLedgerU2FClient() {
   }));
   return _createLedgerU2FClient.apply(this, arguments);
 }
-},{"near-ledger-js":"node_modules/near-ledger-js/index.js","@ledgerhq/hw-transport-u2f":"node_modules/@ledgerhq/hw-transport-u2f/lib-es/TransportU2F.js"}],"script.js":[function(require,module,exports) {
+},{"near-ledger-js":"node_modules/near-ledger-js/index.js","@ledgerhq/hw-transport-u2f":"node_modules/@ledgerhq/hw-transport-u2f/lib-es/TransportU2F.js"}],"utils.js":[function(require,module,exports) {
+var Buffer = require("buffer").Buffer;
+"use strict";
+
+var nearAPI = _interopRequireWildcard(require("near-api-js"));
+
+var _bs = require("bs58");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function accountExists(_x, _x2) {
+  return _accountExists.apply(this, arguments);
+}
+
+function _accountExists() {
+  _accountExists = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(connection, accountId) {
+    var account;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            account = new nearAPI.Account(connection, accountId);
+            _context.next = 4;
+            return account.state();
+
+          case 4:
+            return _context.abrupt("return", true);
+
+          case 7:
+            _context.prev = 7;
+            _context.t0 = _context["catch"](0);
+
+            if (_context.t0.message.includes('does not exist while viewing')) {
+              _context.next = 11;
+              break;
+            }
+
+            throw _context.t0;
+
+          case 11:
+            return _context.abrupt("return", false);
+
+          case 12:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[0, 7]]);
+  }));
+  return _accountExists.apply(this, arguments);
+}
+
+function parseAmount(amount) {
+  try {
+    return nearAPI.utils.format.parseNearAmount(amount.replaceAll(",", ""));
+  } catch (error) {
+    alert("Failed to parse amount ".concat(amount));
+    throw error;
+  }
+}
+
+function getKeys() {
+  var keys = window.localStorage.getItem('keys');
+  return keys ? JSON.parse(keys) : [];
+}
+
+function setKeys(keys) {
+  window.localStorage.setItem('keys', JSON.stringify(keys));
+}
+
+function findPath(_x3) {
+  return _findPath.apply(this, arguments);
+}
+
+function _findPath() {
+  _findPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(accessKeys) {
+    var keys, i, publicKey;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            keys = getKeys();
+            i = 0;
+
+          case 2:
+            if (!(i < keys.length)) {
+              _context2.next = 11;
+              break;
+            }
+
+            publicKey = 'ed25519:' + (0, _bs.encode)(Buffer.from(keys[i].publicKey));
+            console.log(accessKeys, publicKey, accessKeys.includes(publicKey));
+
+            if (!accessKeys.includes(publicKey)) {
+              _context2.next = 8;
+              break;
+            }
+
+            console.log({
+              publicKey: publicKey,
+              path: keys[i].path
+            });
+            return _context2.abrupt("return", {
+              publicKey: publicKey,
+              path: keys[i].path
+            });
+
+          case 8:
+            ++i;
+            _context2.next = 2;
+            break;
+
+          case 11:
+            return _context2.abrupt("return", {
+              publicKey: null,
+              path: null
+            });
+
+          case 12:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _findPath.apply(this, arguments);
+}
+
+module.exports = {
+  accountExists: accountExists,
+  parseAmount: parseAmount,
+  getKeys: getKeys,
+  setKeys: setKeys,
+  findPath: findPath
+};
+},{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","bs58":"node_modules/bs58/index.js","buffer":"node_modules/buffer/index.js"}],"base.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.MultisigBase = void 0;
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var MultisigBase = function MultisigBase(masterAccount, receiverId) {
+  var _this = this;
+
+  _classCallCheck(this, MultisigBase);
+
+  _defineProperty(this, "transfer", function (amount) {
+    _this.actions.push({
+      type: "Transfer",
+      amount: amount
+    });
+
+    return _this;
+  });
+
+  _defineProperty(this, "functionCall", function (methodName, args, deposit, gas) {
+    _this.actions.push({
+      "type": "FunctionCall",
+      "method_name": methodName,
+      "args": btoa(JSON.stringify(args)),
+      "deposit": deposit ? deposit : '0',
+      "gas": gas ? gas : '100000000000000'
+    });
+
+    return _this;
+  });
+
+  _defineProperty(this, "finish", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            console.log("Creating request to ".concat(_this.receiverId, ": ").concat(_this.actions));
+            return _context.abrupt("return", contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: _this.receiverId,
+                actions: _this.actions
+              }
+            }));
+
+          case 2:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  })));
+
+  this.masterAccount = masterAccount;
+  this.receiverId = receiverId;
+  this.actions = [];
+};
+
+exports.MultisigBase = MultisigBase;
+},{}],"lockup.js":[function(require,module,exports) {
+var Buffer = require("buffer").Buffer;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.deployLockup = deployLockup;
+exports.accountToLockup = accountToLockup;
+
+var nearAPI = _interopRequireWildcard(require("near-api-js"));
+
+var utils = _interopRequireWildcard(require("./utils.js"));
+
+var _base = _interopRequireDefault(require("./base.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+var sha256 = require('js-sha256');
+
+var TRANSFER_POLL_ACCOUNT_ID = 'transfer-vote.near';
+var WHITELIST_ACCOUNT_ID = 'lockup-whitelist.near';
+var LOCKUP_CONTRACT_URL = 'https://raw.githubusercontent.com/near/core-contracts/master/lockup/res/lockup_contract.wasm';
+
+function dateToNs(dateString) {
+  // Time from getTime is in millis, we need nanos - multiple by 1M.
+  return (new Date(dateString).getTime() * 1000000).toString();
+}
+
+function accountToLockup(masterAccountId, accountId) {
+  return "".concat(sha256(Buffer.from(accountId)).toString('hex').slice(0, 40), ".").concat(masterAccountId);
+}
+
+function deployLockup(_x, _x2, _x3, _x4, _x5) {
+  return _deployLockup.apply(this, arguments);
+}
+
+function _deployLockup() {
+  _deployLockup = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(masterAccount, accountId, amount, releaseDuration, allowStaking) {
+    var contractId, response, actions;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            contractId = accountToLockup(masterAccount.accountId, accountId);
+            _context.next = 3;
+            return utils.accountExists(masterAccount.connection, contractId);
+
+          case 3:
+            if (!_context.sent) {
+              _context.next = 7;
+              break;
+            }
+
+            console.log("".concat(contractId, " for ").concat(accountId, " already exists."));
+            alert("".concat(contractId, " lockup for ").concat(accountId, " already exists."));
+            return _context.abrupt("return", false);
+
+          case 7:
+            args = {
+              owner_account_id: accountId,
+              lockup_duration: "0",
+              lockup_timestamp: "0",
+              transfers_information: {
+                TransfersDisabled: {
+                  transfer_poll_account_id: TRANSFER_POLL_ACCOUNT_ID
+                }
+              },
+              vesting_schedule: null,
+              release_duration: releaseDuration.toString(),
+              staking_pool_whitelist_account_id: allowStaking ? WHITELIST_ACCOUNT_ID : '',
+              foundation_account_id: null
+            };
+            console.log("Deploy ".concat(contractId, " lockup with ").concat(amount, ":"));
+            console.log("".concat(JSON.stringify(args, null, 4)));
+
+            if (window.lockupContract) {
+              _context.next = 17;
+              break;
+            }
+
+            _context.next = 13;
+            return fetch(LOCKUP_CONTRACT_URL);
+
+          case 13:
+            response = _context.sent;
+            _context.next = 16;
+            return response.body.getReader().read();
+
+          case 16:
+            window.lockupContract = _context.sent;
+
+          case 17:
+            actions = [nearAPI.transactions.transfer(amount), nearAPI.transactions.deployContract(window.lockupContract), nearAPI.transactions.functionCall('new', args, '100000000000000')]; // if (!DRY_RUN) {
+            //     await masterAccount.signAndSendTransaction(contractId, actions);
+            // }
+
+            console.log(JSON.stringify(actions));
+
+          case 19:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _deployLockup.apply(this, arguments);
+}
+},{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","js-sha256":"node_modules/js-sha256/src/sha256.js","./utils.js":"utils.js","./base.js":"base.js","buffer":"node_modules/buffer/index.js"}],"actions.js":[function(require,module,exports) {
+"use strict";
+
+var nearAPI = _interopRequireWildcard(require("near-api-js"));
+
+var utils = _interopRequireWildcard(require("./utils.js"));
+
+var _lockup = require("./lockup.js");
+
+var _ledger = require("./ledger.js");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function setAccountSigner(_x) {
+  return _setAccountSigner.apply(this, arguments);
+}
+
+function _setAccountSigner() {
+  _setAccountSigner = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(contract) {
+    var accessKeys, _yield$utils$findPath, publicKey, path, client, signer;
+
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.next = 2;
+            return contract.getAccessKeys();
+
+          case 2:
+            accessKeys = _context3.sent;
+            console.log(accessKeys);
+            _context3.next = 6;
+            return utils.findPath(accessKeys.map(function (_ref) {
+              var public_key = _ref.public_key;
+              return public_key;
+            }));
+
+          case 6:
+            _yield$utils$findPath = _context3.sent;
+            publicKey = _yield$utils$findPath.publicKey;
+            path = _yield$utils$findPath.path;
+
+            if (!(path == null)) {
+              _context3.next = 12;
+              break;
+            }
+
+            alert("Ledger path not found. Make sure to add it first in \"Keys\" section");
+            throw new Error("No key found");
+
+          case 12:
+            console.log("Found ".concat(publicKey, " at ").concat(path));
+            _context3.next = 15;
+            return (0, _ledger.createLedgerU2FClient)();
+
+          case 15:
+            client = _context3.sent;
+            publicKey = nearAPI.utils.PublicKey.fromString(publicKey);
+            signer = {
+              getPublicKey: function getPublicKey() {
+                return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+                  return regeneratorRuntime.wrap(function _callee$(_context) {
+                    while (1) {
+                      switch (_context.prev = _context.next) {
+                        case 0:
+                          return _context.abrupt("return", publicKey);
+
+                        case 1:
+                        case "end":
+                          return _context.stop();
+                      }
+                    }
+                  }, _callee);
+                }))();
+              },
+              signMessage: function signMessage(message) {
+                return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+                  var signature;
+                  return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                    while (1) {
+                      switch (_context2.prev = _context2.next) {
+                        case 0:
+                          _context2.next = 2;
+                          return client.sign(message, path);
+
+                        case 2:
+                          signature = _context2.sent;
+                          return _context2.abrupt("return", {
+                            signature: signature,
+                            publicKey: publicKey
+                          });
+
+                        case 4:
+                        case "end":
+                          return _context2.stop();
+                      }
+                    }
+                  }, _callee2);
+                }))();
+              }
+            };
+            contract.connection.signer = signer;
+
+          case 19:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _setAccountSigner.apply(this, arguments);
+}
+
+function funcCall(methodName, args, deposit, gas) {
+  return {
+    "type": "FunctionCall",
+    "method_name": methodName,
+    "args": btoa(JSON.stringify(args)),
+    "deposit": deposit ? deposit : '0',
+    "gas": gas ? gas : '100000000000000'
+  };
+}
+
+function addKey(_x2) {
+  return _addKey.apply(this, arguments);
+}
+
+function _addKey() {
+  _addKey = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(contract) {
+    var publicKeyStr, publicKey;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            publicKeyStr = document.querySelector('#new-key').value; // check it's a valid key.
+
+            publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
+            console.log("Add ".concat(publicKey.toString(), " key"));
+            _context4.next = 5;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: accountId,
+                actions: [{
+                  type: "AddKey",
+                  public_key: publicKey.toString().replace('ed25519:', ''),
+                  permission: {
+                    allowance: null,
+                    receiver_id: accountId,
+                    method_names: ['add_request', 'add_request_and_confirm', 'confirm', 'delete_request']
+                  }
+                }]
+              }
+            });
+
+          case 5:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _addKey.apply(this, arguments);
+}
+
+function transfer(_x3) {
+  return _transfer.apply(this, arguments);
+}
+
+function _transfer() {
+  _transfer = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(contract) {
+    var receiverId, amount;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            receiverId = document.querySelector('#transfer-receiver').value;
+            _context5.next = 3;
+            return utils.accountExists(window.near.connection, receiverId);
+
+          case 3:
+            if (_context5.sent) {
+              _context5.next = 6;
+              break;
+            }
+
+            alert("Account ".concat(receiverId, " doesn't exist"));
+            return _context5.abrupt("return");
+
+          case 6:
+            amount = document.querySelector('#transfer-amount').value;
+            console.log("Send from ".concat(accountId, " to ").concat(receiverId, " ").concat(amount));
+            amount = utils.parseAmount(amount);
+            _context5.next = 11;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: receiverId,
+                actions: [{
+                  type: "Transfer",
+                  amount: amount
+                }]
+              }
+            });
+
+          case 11:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5);
+  }));
+  return _transfer.apply(this, arguments);
+}
+
+function setNumConfirmations(_x4) {
+  return _setNumConfirmations.apply(this, arguments);
+}
+
+function _setNumConfirmations() {
+  _setNumConfirmations = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(contract) {
+    var numConfirmations, accessKeys;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            numConfirmations = document.querySelector('#num-confirmations').value;
+            _context6.prev = 1;
+            numConfirmations = parseInt(numConfirmations);
+            _context6.next = 9;
+            break;
+
+          case 5:
+            _context6.prev = 5;
+            _context6.t0 = _context6["catch"](1);
+            alert(_context6.t0);
+            return _context6.abrupt("return");
+
+          case 9:
+            _context6.next = 11;
+            return contract.getAccessKeys();
+
+          case 11:
+            accessKeys = _context6.sent;
+            console.log("Change ".concat(accountId, " to ").concat(numConfirmations, " of ").concat(accessKeys.length, " multisig"));
+
+            if (!(numConfirmations + 1 > accessKeys.length)) {
+              _context6.next = 16;
+              break;
+            }
+
+            alert("Dangerously high number of confirmations. Set lower or add more keys");
+            return _context6.abrupt("return");
+
+          case 16:
+            if (!(numConfirmations < 1)) {
+              _context6.next = 19;
+              break;
+            }
+
+            alert('Min num confirmations is 1');
+            return _context6.abrupt("return");
+
+          case 19:
+            _context6.next = 21;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: accountId,
+                actions: [{
+                  type: "SetNumConfirmations",
+                  num_confirmations: numConfirmations
+                }]
+              }
+            });
+
+          case 21:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6, null, [[1, 5]]);
+  }));
+  return _setNumConfirmations.apply(this, arguments);
+}
+
+function vestingTermination(_x5, _x6) {
+  return _vestingTermination.apply(this, arguments);
+}
+
+function _vestingTermination() {
+  _vestingTermination = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(contract, requestKind) {
+    var lockupAccountId, lockupAccount;
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            lockupAccountId = document.querySelector('#lockup-account-id').value;
+            _context7.next = 3;
+            return utils.accountExists(window.near.connection, lockupAccountId);
+
+          case 3:
+            if (_context7.sent) {
+              _context7.next = 6;
+              break;
+            }
+
+            alert("Account ".concat(lockupAccountId, " doesn't exist"));
+            return _context7.abrupt("return");
+
+          case 6:
+            _context7.next = 8;
+            return window.near.account(lockupAccountId);
+
+          case 8:
+            lockupAccount = _context7.sent;
+            console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
+
+            if (!(requestKind === "terminate_vesting")) {
+              _context7.next = 15;
+              break;
+            }
+
+            _context7.next = 13;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: lockupAccountId,
+                actions: [funcCall("terminate_vesting", {})]
+              }
+            });
+
+          case 13:
+            _context7.next = 18;
+            break;
+
+          case 15:
+            if (!(requestKind === "termination_withdraw")) {
+              _context7.next = 18;
+              break;
+            }
+
+            _context7.next = 18;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: lockupAccountId,
+                actions: [funcCall("termination_withdraw", {
+                  receiver_id: accountId
+                })]
+              }
+            });
+
+          case 18:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
+  }));
+  return _vestingTermination.apply(this, arguments);
+}
+
+function setupMultisig(_x7) {
+  return _setupMultisig.apply(this, arguments);
+}
+
+function _setupMultisig() {
+  _setupMultisig = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(contract) {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+          case "end":
+            return _context8.stop();
+        }
+      }
+    }, _callee8);
+  }));
+  return _setupMultisig.apply(this, arguments);
+}
+
+function setupLockup(_x8) {
+  return _setupLockup.apply(this, arguments);
+}
+
+function _setupLockup() {
+  _setupLockup = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(contract) {
+    var accountId, amount, duration, allowStaking;
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            accountId = document.querySelector('#create-lockup-account-id').value;
+            amount = document.querySelector('#create-lockup-amount').value;
+            duration = document.querySelector('#create-lockup-duration').value;
+            allowStaking = document.querySelector('#create-lockup-staking').value;
+            _context9.next = 6;
+            return utils.accountExists(window.near.connection, accountId);
+
+          case 6:
+            if (_context9.sent) {
+              _context9.next = 9;
+              break;
+            }
+
+            alert("".concat(accountId, " doesn't exit. Create it first."));
+            return _context9.abrupt("return");
+
+          case 9:
+            amount = utils.parseAmount(amount);
+            _context9.prev = 10;
+            duration = parseInt(duration);
+            _context9.next = 18;
+            break;
+
+          case 14:
+            _context9.prev = 14;
+            _context9.t0 = _context9["catch"](10);
+            alert("Failed to parse duration ".concat(duration));
+            return _context9.abrupt("return");
+
+          case 18:
+            // Days to nano seconds.
+            duration = duration * 60 * 60 * 24 * 1000 * 1000 * 1000;
+            _context9.next = 21;
+            return (0, _lockup.deployLockup)(contract, accountId, amount, duration, allowStaking);
+
+          case 21:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9, null, [[10, 14]]);
+  }));
+  return _setupLockup.apply(this, arguments);
+}
+
+function submitRequest(_x9, _x10) {
+  return _submitRequest.apply(this, arguments);
+}
+
+function _submitRequest() {
+  _submitRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10(accountId, requestKind) {
+    var contract;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            _context10.next = 2;
+            return window.near.account(accountId);
+
+          case 2:
+            contract = _context10.sent;
+            _context10.prev = 3;
+            _context10.next = 6;
+            return setAccountSigner(contract);
+
+          case 6:
+            if (!(requestKind === "add_key")) {
+              _context10.next = 11;
+              break;
+            }
+
+            _context10.next = 9;
+            return addKey(contract);
+
+          case 9:
+            _context10.next = 37;
+            break;
+
+          case 11:
+            if (!(requestKind === "transfer")) {
+              _context10.next = 16;
+              break;
+            }
+
+            _context10.next = 14;
+            return transfer(contract);
+
+          case 14:
+            _context10.next = 37;
+            break;
+
+          case 16:
+            if (!(requestKind === "num_confirmations")) {
+              _context10.next = 21;
+              break;
+            }
+
+            _context10.next = 19;
+            return setNumConfirmations(contract);
+
+          case 19:
+            _context10.next = 37;
+            break;
+
+          case 21:
+            if (!(requestKind === "terminate_vesting" || requestKind === "termination_withdraw")) {
+              _context10.next = 26;
+              break;
+            }
+
+            _context10.next = 24;
+            return vestingTermination(contract, requestKind);
+
+          case 24:
+            _context10.next = 37;
+            break;
+
+          case 26:
+            if (!(requestKind == "multisig")) {
+              _context10.next = 31;
+              break;
+            }
+
+            _context10.next = 29;
+            return setupMultisig(contract);
+
+          case 29:
+            _context10.next = 37;
+            break;
+
+          case 31:
+            if (!(requestKind == "lockup")) {
+              _context10.next = 36;
+              break;
+            }
+
+            _context10.next = 34;
+            return setupLockup(contract);
+
+          case 34:
+            _context10.next = 37;
+            break;
+
+          case 36:
+            alert("Unkonwn request kind: ".concat(requestKind));
+
+          case 37:
+            _context10.next = 43;
+            break;
+
+          case 39:
+            _context10.prev = 39;
+            _context10.t0 = _context10["catch"](3);
+            console.log(_context10.t0);
+            alert(_context10.t0);
+
+          case 43:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    }, _callee10, null, [[3, 39]]);
+  }));
+  return _submitRequest.apply(this, arguments);
+}
+
+module.exports = {
+  setAccountSigner: setAccountSigner,
+  submitRequest: submitRequest,
+  funcCall: funcCall
+};
+},{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","./utils.js":"utils.js","./lockup.js":"lockup.js","./ledger.js":"ledger.js"}],"staking.js":[function(require,module,exports) {
+"use strict";
+
+var nearAPI = _interopRequireWildcard(require("near-api-js"));
+
+var _mustache = _interopRequireDefault(require("mustache"));
+
+var _actions = require("./actions");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function fetchPools(_x) {
+  return _fetchPools.apply(this, arguments);
+}
+
+function _fetchPools() {
+  _fetchPools = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(masterAccount) {
+    var result, pools, stakes, poolsWithFee, promises;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return masterAccount.connection.provider.sendJsonRpc('validators', [null]);
+
+          case 2:
+            result = _context2.sent;
+            pools = new Set();
+            stakes = new Map();
+            result.current_validators.forEach(function (validator) {
+              pools.add(validator.account_id);
+              stakes.set(validator.account_id, validator.stake);
+            });
+            result.next_validators.forEach(function (validator) {
+              return pools.add(validator.account_id);
+            });
+            result.current_proposals.forEach(function (validator) {
+              return pools.add(validator.account_id);
+            });
+            poolsWithFee = [];
+            promises = [];
+            pools.forEach(function (accountId) {
+              promises.push(_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+                var stake, fee;
+                return regeneratorRuntime.wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        stake = nearAPI.utils.format.formatNearAmount(stakes.get(accountId), 2);
+                        _context.next = 3;
+                        return masterAccount.viewFunction(accountId, 'get_reward_fee_fraction', {});
+
+                      case 3:
+                        fee = _context.sent;
+                        poolsWithFee.push({
+                          poolId: accountId,
+                          stake: stake,
+                          fee: "".concat(fee.numerator * 100 / fee.denominator, "%")
+                        });
+
+                      case 5:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee);
+              }))());
+            });
+            _context2.next = 13;
+            return Promise.all(promises);
+
+          case 13:
+            return _context2.abrupt("return", poolsWithFee);
+
+          case 14:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _fetchPools.apply(this, arguments);
+}
+
+function loadAccountStaking(_x2) {
+  return _loadAccountStaking.apply(this, arguments);
+}
+
+function _loadAccountStaking() {
+  _loadAccountStaking = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(accountId) {
+    var masterAccount, pools, template, staking;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            _context4.next = 2;
+            return window.near.account(accountId);
+
+          case 2:
+            masterAccount = _context4.sent;
+            _context4.next = 5;
+            return fetchPools(masterAccount);
+
+          case 5:
+            pools = _context4.sent;
+            console.log(pools);
+            template = document.getElementById('template-staking').innerHTML;
+            staking = [];
+            _context4.next = 11;
+            return Promise.all(pools.map( /*#__PURE__*/function () {
+              var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref2) {
+                var poolId, totalStaked, totalUnstaked;
+                return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                  while (1) {
+                    switch (_context3.prev = _context3.next) {
+                      case 0:
+                        poolId = _ref2.poolId;
+                        _context3.next = 3;
+                        return masterAccount.viewFunction(poolId, "get_account_staked_balance", {
+                          account_id: accountId
+                        });
+
+                      case 3:
+                        totalStaked = _context3.sent;
+                        _context3.next = 6;
+                        return masterAccount.viewFunction(poolId, "get_account_unstaked_balance", {
+                          account_id: accountId
+                        });
+
+                      case 6:
+                        totalUnstaked = _context3.sent;
+
+                        if (totalStaked != "0" || totalUnstaked != "0") {
+                          staking.push({
+                            poolId: poolId,
+                            totalStaked: nearAPI.utils.format.formatNearAmount(totalStaked, 2),
+                            totalUnstaked: nearAPI.utils.format.formatNearAmount(totalUnstaked, 2)
+                          });
+                        }
+
+                      case 8:
+                      case "end":
+                        return _context3.stop();
+                    }
+                  }
+                }, _callee3);
+              }));
+
+              return function (_x7) {
+                return _ref3.apply(this, arguments);
+              };
+            }()));
+
+          case 11:
+            document.getElementById('requests').innerHTML = _mustache.default.render(template, {
+              accountId: accountId,
+              pools: pools,
+              staking: staking
+            });
+
+          case 12:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _loadAccountStaking.apply(this, arguments);
+}
+
+function withdrawAll(_x3, _x4) {
+  return _withdrawAll.apply(this, arguments);
+}
+
+function _withdrawAll() {
+  _withdrawAll = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(accountId, poolId) {
+    var masterAccount;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.next = 2;
+            return window.near.account(accountId);
+
+          case 2:
+            masterAccount = _context5.sent;
+            _context5.prev = 3;
+            _context5.next = 6;
+            return (0, _actions.setAccountSigner)(masterAccount);
+
+          case 6:
+            _context5.next = 8;
+            return masterAccount.functionCall(accountId, "add_request", {
+              request: {
+                receiver_id: poolId,
+                actions: [(0, _actions.funcCall)("withdraw_all", {})]
+              }
+            });
+
+          case 8:
+            _context5.next = 14;
+            break;
+
+          case 10:
+            _context5.prev = 10;
+            _context5.t0 = _context5["catch"](3);
+            console.error(_context5.t0);
+            alert(_context5.t0);
+
+          case 14:
+            loadAccountStaking(accountId);
+
+          case 15:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5, null, [[3, 10]]);
+  }));
+  return _withdrawAll.apply(this, arguments);
+}
+
+function unstakeAll(_x5, _x6) {
+  return _unstakeAll.apply(this, arguments);
+}
+
+function _unstakeAll() {
+  _unstakeAll = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(accountId, poolId) {
+    var masterAccount;
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _context6.next = 2;
+            return window.near.account(accountId);
+
+          case 2:
+            masterAccount = _context6.sent;
+            _context6.prev = 3;
+            _context6.next = 6;
+            return (0, _actions.setAccountSigner)(masterAccount);
+
+          case 6:
+            _context6.next = 8;
+            return masterAccount.functionCall(accountId, "add_request", {
+              request: {
+                receiver_id: poolId,
+                actions: [(0, _actions.funcCall)("unstake_all", {})]
+              }
+            });
+
+          case 8:
+            _context6.next = 14;
+            break;
+
+          case 10:
+            _context6.prev = 10;
+            _context6.t0 = _context6["catch"](3);
+            console.error(_context6.t0);
+            alert(_context6.t0);
+
+          case 14:
+            loadAccountStaking(accountId);
+
+          case 15:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6, null, [[3, 10]]);
+  }));
+  return _unstakeAll.apply(this, arguments);
+}
+
+module.exports = {
+  loadAccountStaking: loadAccountStaking
+};
+window.withdrawAll = withdrawAll;
+window.unstakeAll = unstakeAll;
+},{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","mustache":"node_modules/mustache/mustache.js","./actions":"actions.js"}],"script.js":[function(require,module,exports) {
 var Buffer = require("buffer").Buffer;
 "use strict";
 
@@ -24438,11 +25618,29 @@ var _mustache = _interopRequireDefault(require("mustache"));
 
 var _ledger = require("./ledger.js");
 
+var actions = _interopRequireWildcard(require("./actions.js"));
+
+var _staking = require("./staking.js");
+
+var utils = _interopRequireWildcard(require("./utils.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -24479,7 +25677,7 @@ window.onload = function () {
             }
 
             _context.next = 10;
-            return loadAccountDetails(window.location.hash.slice(1));
+            return display(window.location.hash.slice(1));
 
           case 10:
           case "end":
@@ -24492,49 +25690,6 @@ window.onload = function () {
   });
 };
 
-function accountExists(_x, _x2) {
-  return _accountExists.apply(this, arguments);
-}
-
-function _accountExists() {
-  _accountExists = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(connection, accountId) {
-    var account;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            _context2.prev = 0;
-            account = new nearAPI.Account(connection, accountId);
-            _context2.next = 4;
-            return account.state();
-
-          case 4:
-            return _context2.abrupt("return", true);
-
-          case 7:
-            _context2.prev = 7;
-            _context2.t0 = _context2["catch"](0);
-
-            if (_context2.t0.message.includes('does not exist while viewing')) {
-              _context2.next = 11;
-              break;
-            }
-
-            throw _context2.t0;
-
-          case 11:
-            return _context2.abrupt("return", false);
-
-          case 12:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2, null, [[0, 7]]);
-  }));
-  return _accountExists.apply(this, arguments);
-}
-
 function getAccounts() {
   var accountIds = window.localStorage.getItem('accounts');
   return accountIds ? accountIds.split(',') : [];
@@ -24544,25 +25699,16 @@ function setAccounts(accountIds) {
   window.localStorage.setItem('accounts', accountIds.join(','));
 }
 
-function getKeys() {
-  var keys = window.localStorage.getItem('keys');
-  return keys ? JSON.parse(keys) : [];
-}
-
-function setKeys(keys) {
-  window.localStorage.setItem('keys', JSON.stringify(keys));
-}
-
 function loadAccounts() {
   return _loadAccounts.apply(this, arguments);
 }
 
 function _loadAccounts() {
-  _loadAccounts = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+  _loadAccounts = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
     var accountIds, accounts, path, i, account, state, template;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
             accountIds = getAccounts();
             console.log("Accounts: ".concat(accountIds));
@@ -24572,37 +25718,37 @@ function _loadAccounts() {
 
           case 5:
             if (!(i < accountIds.length)) {
-              _context3.next = 22;
+              _context2.next = 22;
               break;
             }
 
-            _context3.prev = 6;
-            _context3.next = 9;
+            _context2.prev = 6;
+            _context2.next = 9;
             return window.near.account(accountIds[i]);
 
           case 9:
-            account = _context3.sent;
-            _context3.next = 12;
+            account = _context2.sent;
+            _context2.next = 12;
             return account.state();
 
           case 12:
-            state = _context3.sent;
+            state = _context2.sent;
             accounts.push({
               accountId: accountIds[i],
               amount: nearAPI.utils.format.formatNearAmount(state.amount, 2) //active: (accountIds[i] === path) ? 'active' : '',
 
             });
-            _context3.next = 19;
+            _context2.next = 19;
             break;
 
           case 16:
-            _context3.prev = 16;
-            _context3.t0 = _context3["catch"](6);
-            console.log(_context3.t0);
+            _context2.prev = 16;
+            _context2.t0 = _context2["catch"](6);
+            console.log(_context2.t0);
 
           case 19:
             ++i;
-            _context3.next = 5;
+            _context2.next = 5;
             break;
 
           case 22:
@@ -24614,10 +25760,10 @@ function _loadAccounts() {
 
           case 25:
           case "end":
-            return _context3.stop();
+            return _context2.stop();
         }
       }
-    }, _callee3, null, [[6, 16]]);
+    }, _callee2, null, [[6, 16]]);
   }));
   return _loadAccounts.apply(this, arguments);
 }
@@ -24627,11 +25773,11 @@ function addAccount() {
 }
 
 function _addAccount() {
-  _addAccount = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+  _addAccount = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
     var accountId, accountIds;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context3.prev = _context3.next) {
           case 0:
             accountId = document.querySelector('#account').value;
             console.log("Adding ".concat(accountId));
@@ -24642,7 +25788,7 @@ function _addAccount() {
               setAccounts(accountIds);
             }
 
-            _context4.next = 6;
+            _context3.next = 6;
             return loadAccounts();
 
           case 6:
@@ -24650,21 +25796,70 @@ function _addAccount() {
 
           case 7:
           case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _addAccount.apply(this, arguments);
+}
+
+function display(_x) {
+  return _display.apply(this, arguments);
+}
+
+function _display() {
+  _display = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(path) {
+    var accountId, kind, _path$split, _path$split2;
+
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            accountId = path, kind = 'details';
+
+            if (path.includes('/')) {
+              _path$split = path.split('/');
+              _path$split2 = _slicedToArray(_path$split, 2);
+              accountId = _path$split2[0];
+              kind = _path$split2[1];
+            }
+
+            _context4.t0 = kind;
+            _context4.next = _context4.t0 === 'staking' ? 5 : _context4.t0 === 'details' ? 8 : 8;
+            break;
+
+          case 5:
+            _context4.next = 7;
+            return (0, _staking.loadAccountStaking)(accountId);
+
+          case 7:
+            return _context4.abrupt("break", 11);
+
+          case 8:
+            _context4.next = 10;
+            return loadAccountDetails(accountId);
+
+          case 10:
+            return _context4.abrupt("break", 11);
+
+          case 11:
+          case "end":
             return _context4.stop();
         }
       }
     }, _callee4);
   }));
-  return _addAccount.apply(this, arguments);
+  return _display.apply(this, arguments);
 }
 
-function loadAccountDetails(_x3) {
+function loadAccountDetails(_x2) {
   return _loadAccountDetails.apply(this, arguments);
 }
 
 function _loadAccountDetails() {
   _loadAccountDetails = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(accountId) {
-    var accountIds, contract, numConfirmations, accessKeys, request_ids, requests, i, details, confirms, repr, _i, action, template;
+    var accountIds, contract, numConfirmations, accessKeys, request_ids, requests, i, details, confirms, repr, _i2, action, template;
 
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -24729,15 +25924,15 @@ function _loadAccountDetails() {
           case 28:
             confirms = _context5.sent;
             repr = [];
-            _i = 0;
+            _i2 = 0;
 
           case 31:
-            if (!(_i < details.actions.length)) {
+            if (!(_i2 < details.actions.length)) {
               _context5.next = 47;
               break;
             }
 
-            action = details.actions[_i];
+            action = details.actions[_i2];
             _context5.t0 = action.type;
             _context5.next = _context5.t0 === 'Transfer' ? 36 : _context5.t0 === 'FunctionCall' ? 38 : _context5.t0 === 'SetNumConfirmations' ? 40 : 42;
             break;
@@ -24759,7 +25954,7 @@ function _loadAccountDetails() {
             return _context5.abrupt("break", 44);
 
           case 44:
-            ++_i;
+            ++_i2;
             _context5.next = 31;
             break;
 
@@ -24801,449 +25996,129 @@ function _loadAccountDetails() {
   return _loadAccountDetails.apply(this, arguments);
 }
 
-function setAccountSigner(_x4) {
-  return _setAccountSigner.apply(this, arguments);
-}
-
-function _setAccountSigner() {
-  _setAccountSigner = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(contract) {
-    var accessKeys, _yield$findPath, publicKey, path, client, signer;
-
-    return regeneratorRuntime.wrap(function _callee8$(_context8) {
-      while (1) {
-        switch (_context8.prev = _context8.next) {
-          case 0:
-            _context8.next = 2;
-            return contract.getAccessKeys();
-
-          case 2:
-            accessKeys = _context8.sent;
-            console.log(accessKeys);
-            _context8.next = 6;
-            return findPath(accessKeys.map(function (_ref2) {
-              var public_key = _ref2.public_key;
-              return public_key;
-            }));
-
-          case 6:
-            _yield$findPath = _context8.sent;
-            publicKey = _yield$findPath.publicKey;
-            path = _yield$findPath.path;
-
-            if (!(path == null)) {
-              _context8.next = 12;
-              break;
-            }
-
-            alert("Ledger path not found. Make sure to add it first in \"Keys\" section");
-            throw new Error("No key found");
-
-          case 12:
-            console.log("Found ".concat(publicKey, " at ").concat(path));
-            _context8.next = 15;
-            return (0, _ledger.createLedgerU2FClient)();
-
-          case 15:
-            client = _context8.sent;
-            publicKey = nearAPI.utils.PublicKey.fromString(publicKey);
-            signer = {
-              getPublicKey: function getPublicKey() {
-                return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6() {
-                  return regeneratorRuntime.wrap(function _callee6$(_context6) {
-                    while (1) {
-                      switch (_context6.prev = _context6.next) {
-                        case 0:
-                          return _context6.abrupt("return", publicKey);
-
-                        case 1:
-                        case "end":
-                          return _context6.stop();
-                      }
-                    }
-                  }, _callee6);
-                }))();
-              },
-              signMessage: function signMessage(message) {
-                return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
-                  var signature;
-                  return regeneratorRuntime.wrap(function _callee7$(_context7) {
-                    while (1) {
-                      switch (_context7.prev = _context7.next) {
-                        case 0:
-                          _context7.next = 2;
-                          return client.sign(message, path);
-
-                        case 2:
-                          signature = _context7.sent;
-                          return _context7.abrupt("return", {
-                            signature: signature,
-                            publicKey: publicKey
-                          });
-
-                        case 4:
-                        case "end":
-                          return _context7.stop();
-                      }
-                    }
-                  }, _callee7);
-                }))();
-              }
-            };
-            contract.connection.signer = signer;
-
-          case 19:
-          case "end":
-            return _context8.stop();
-        }
-      }
-    }, _callee8);
-  }));
-  return _setAccountSigner.apply(this, arguments);
-}
-
-function confirmRequest(_x5, _x6) {
+function confirmRequest(_x3, _x4) {
   return _confirmRequest.apply(this, arguments);
 }
 
 function _confirmRequest() {
-  _confirmRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(accountId, requestId) {
+  _confirmRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(accountId, requestId) {
     var contract;
-    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+    return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
             console.log("Confirm ".concat(accountId, " request ").concat(requestId));
-            _context9.next = 3;
+            _context6.next = 3;
             return window.near.account(accountId);
 
           case 3:
-            contract = _context9.sent;
-            _context9.prev = 4;
-            _context9.next = 7;
-            return setAccountSigner(contract);
+            contract = _context6.sent;
+            _context6.prev = 4;
+            _context6.next = 7;
+            return actions.setAccountSigner(contract);
 
           case 7:
-            _context9.next = 9;
+            _context6.next = 9;
             return contract.functionCall(accountId, 'confirm', {
               request_id: requestId
             }, '150000000000000');
 
           case 9:
-            _context9.next = 15;
+            _context6.next = 15;
             break;
 
           case 11:
-            _context9.prev = 11;
-            _context9.t0 = _context9["catch"](4);
-            console.log(_context9.t0);
-            alert(_context9.t0);
+            _context6.prev = 11;
+            _context6.t0 = _context6["catch"](4);
+            console.log(_context6.t0);
+            alert(_context6.t0);
 
           case 15:
             loadAccountDetails(accountId);
 
           case 16:
           case "end":
-            return _context9.stop();
+            return _context6.stop();
         }
       }
-    }, _callee9, null, [[4, 11]]);
+    }, _callee6, null, [[4, 11]]);
   }));
   return _confirmRequest.apply(this, arguments);
 }
 
-function deleteRequest(_x7, _x8) {
+function deleteRequest(_x5, _x6) {
   return _deleteRequest.apply(this, arguments);
 }
 
 function _deleteRequest() {
-  _deleteRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10(accountId, requestId) {
+  _deleteRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(accountId, requestId) {
     var contract;
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             console.log("Delete ".concat(accountId, " request ").concat(requestId));
-            _context10.next = 3;
+            _context7.next = 3;
             return window.near.account(accountId);
 
           case 3:
-            contract = _context10.sent;
-            _context10.prev = 4;
-            _context10.next = 7;
-            return setAccountSigner(contract);
+            contract = _context7.sent;
+            _context7.prev = 4;
+            _context7.next = 7;
+            return actions.setAccountSigner(contract);
 
           case 7:
-            _context10.next = 9;
+            _context7.next = 9;
             return contract.functionCall(accountId, 'delete_request', {
               request_id: requestId
             });
 
           case 9:
-            _context10.next = 15;
+            _context7.next = 15;
             break;
 
           case 11:
-            _context10.prev = 11;
-            _context10.t0 = _context10["catch"](4);
-            console.log(_context10.t0);
-            alert(_context10.t0);
+            _context7.prev = 11;
+            _context7.t0 = _context7["catch"](4);
+            console.log(_context7.t0);
+            alert(_context7.t0);
 
           case 15:
             loadAccountDetails(accountId);
 
           case 16:
           case "end":
-            return _context10.stop();
+            return _context7.stop();
         }
       }
-    }, _callee10, null, [[4, 11]]);
+    }, _callee7, null, [[4, 11]]);
   }));
   return _deleteRequest.apply(this, arguments);
 }
 
-function funcCall(methodName, args, deposit, gas) {
-  return {
-    "type": "FunctionCall",
-    "method_name": methodName,
-    "args": btoa(JSON.stringify(args)),
-    "deposit": deposit ? deposit : '0',
-    "gas": gas ? gas : '100000000000000'
-  };
-}
-
-function submitRequest(_x9, _x10) {
+function submitRequest(_x7, _x8) {
   return _submitRequest.apply(this, arguments);
 }
 
 function _submitRequest() {
-  _submitRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee11(accountId, requestKind) {
-    var contract, publicKeyStr, publicKey, receiverId, amount, numConfirmations, accessKeys, lockupAccountId, lockupAccount;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+  _submitRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(accountId, requestKind) {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            _context11.next = 2;
-            return window.near.account(accountId);
+            _context8.next = 2;
+            return actions.submitRequest(accountId, requestKind);
 
           case 2:
-            contract = _context11.sent;
-            _context11.prev = 3;
-            _context11.next = 6;
-            return setAccountSigner(contract);
-
-          case 6:
-            if (!(requestKind === "add_key")) {
-              _context11.next = 14;
-              break;
-            }
-
-            publicKeyStr = document.querySelector('#new-key').value; // check it's a valid key.
-
-            publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
-            console.log("Add ".concat(publicKey.toString(), " key"));
-            _context11.next = 12;
-            return contract.functionCall(accountId, 'add_request', {
-              request: {
-                receiver_id: accountId,
-                actions: [{
-                  type: "AddKey",
-                  public_key: publicKey.toString().replace('ed25519:', ''),
-                  permission: {
-                    allowance: null,
-                    receiver_id: accountId,
-                    method_names: ['add_request', 'add_request_and_confirm', 'confirm', 'delete_request']
-                  }
-                }]
-              }
-            });
-
-          case 12:
-            _context11.next = 73;
-            break;
-
-          case 14:
-            if (!(requestKind === "transfer")) {
-              _context11.next = 27;
-              break;
-            }
-
-            receiverId = document.querySelector('#transfer-receiver').value;
-            _context11.next = 18;
-            return accountExists(window.near.connection, receiverId);
-
-          case 18:
-            if (_context11.sent) {
-              _context11.next = 21;
-              break;
-            }
-
-            alert("Account ".concat(receiverId, " doesn't exist"));
-            return _context11.abrupt("return");
-
-          case 21:
-            amount = document.querySelector('#transfer-amount').value;
-            console.log("Send from ".concat(accountId, " to ").concat(receiverId, " ").concat(amount));
-            _context11.next = 25;
-            return contract.functionCall(accountId, 'add_request', {
-              request: {
-                receiver_id: receiverId,
-                actions: [{
-                  type: "Transfer",
-                  amount: nearAPI.utils.format.parseNearAmount(amount)
-                }]
-              }
-            });
-
-          case 25:
-            _context11.next = 73;
-            break;
-
-          case 27:
-            if (!(requestKind === "num_confirmations")) {
-              _context11.next = 51;
-              break;
-            }
-
-            numConfirmations = document.querySelector('#num-confirmations').value;
-            _context11.prev = 29;
-            numConfirmations = parseInt(numConfirmations);
-            _context11.next = 37;
-            break;
-
-          case 33:
-            _context11.prev = 33;
-            _context11.t0 = _context11["catch"](29);
-            alert(_context11.t0);
-            return _context11.abrupt("return");
-
-          case 37:
-            _context11.next = 39;
-            return contract.getAccessKeys();
-
-          case 39:
-            accessKeys = _context11.sent;
-            console.log("Change ".concat(accountId, " to ").concat(numConfirmations, " of ").concat(accessKeys.length, " multisig"));
-
-            if (!(numConfirmations + 1 > accessKeys.length)) {
-              _context11.next = 44;
-              break;
-            }
-
-            alert("Dangerously high number of confirmations. Set lower or add more keys");
-            return _context11.abrupt("return");
-
-          case 44:
-            if (!(numConfirmations < 1)) {
-              _context11.next = 47;
-              break;
-            }
-
-            alert('Min num confirmations is 1');
-            return _context11.abrupt("return");
-
-          case 47:
-            _context11.next = 49;
-            return contract.functionCall(accountId, 'add_request', {
-              request: {
-                receiver_id: accountId,
-                actions: [{
-                  type: "SetNumConfirmations",
-                  num_confirmations: numConfirmations
-                }]
-              }
-            });
-
-          case 49:
-            _context11.next = 73;
-            break;
-
-          case 51:
-            if (!(requestKind === "terminate_vesting" || requestKind === "termination_withdraw")) {
-              _context11.next = 72;
-              break;
-            }
-
-            lockupAccountId = document.querySelector('#lockup-account-id').value;
-            _context11.next = 55;
-            return accountExists(window.near.connection, lockupAccountId);
-
-          case 55:
-            if (_context11.sent) {
-              _context11.next = 58;
-              break;
-            }
-
-            alert("Account ".concat(lockupAccountId, " doesn't exist"));
-            return _context11.abrupt("return");
-
-          case 58:
-            _context11.next = 60;
-            return window.near.account(lockupAccountId);
-
-          case 60:
-            lockupAccount = _context11.sent;
-            console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
-
-            if (!(requestKind === "terminate_vesting")) {
-              _context11.next = 67;
-              break;
-            }
-
-            _context11.next = 65;
-            return contract.functionCall(accountId, 'add_request', {
-              request: {
-                receiver_id: lockupAccountId,
-                actions: [funcCall("terminate_vesting", {})]
-              }
-            });
-
-          case 65:
-            _context11.next = 70;
-            break;
-
-          case 67:
-            if (!(requestKind === "termination_withdraw")) {
-              _context11.next = 70;
-              break;
-            }
-
-            _context11.next = 70;
-            return contract.functionCall(accountId, 'add_request', {
-              request: {
-                receiver_id: lockupAccountId,
-                actions: [funcCall("termination_withdraw", {
-                  receiver_id: accountId
-                })]
-              }
-            });
-
-          case 70:
-            _context11.next = 73;
-            break;
-
-          case 72:
-            alert("Unkonwn request kind: ".concat(requestKind));
-
-          case 73:
-            _context11.next = 79;
-            break;
-
-          case 75:
-            _context11.prev = 75;
-            _context11.t1 = _context11["catch"](3);
-            console.log(_context11.t1);
-            alert(_context11.t1);
-
-          case 79:
-            _context11.next = 81;
+            _context8.next = 4;
             return loadAccountDetails(accountId);
 
-          case 81:
+          case 4:
           case "end":
-            return _context11.stop();
+            return _context8.stop();
         }
       }
-    }, _callee11, null, [[3, 75], [29, 33]]);
+    }, _callee8);
   }));
   return _submitRequest.apply(this, arguments);
 }
@@ -25253,18 +26128,18 @@ function loadKeys() {
 }
 
 function _loadKeys() {
-  _loadKeys = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12() {
+  _loadKeys = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
     var keys, template;
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context12.prev = _context12.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
-            keys = getKeys();
+            keys = utils.getKeys();
             template = document.getElementById('template-keys').innerHTML;
             document.getElementById('keys').innerHTML = _mustache.default.render(template, {
-              keys: keys.map(function (_ref3) {
-                var publicKey = _ref3.publicKey,
-                    path = _ref3.path;
+              keys: keys.map(function (_ref2) {
+                var publicKey = _ref2.publicKey,
+                    path = _ref2.path;
                 return {
                   publicKey: (0, _bs.encode)(Buffer.from(publicKey)),
                   path: path
@@ -25274,70 +26149,12 @@ function _loadKeys() {
 
           case 3:
           case "end":
-            return _context12.stop();
+            return _context9.stop();
         }
       }
-    }, _callee12);
+    }, _callee9);
   }));
   return _loadKeys.apply(this, arguments);
-}
-
-function findPath(_x11) {
-  return _findPath.apply(this, arguments);
-}
-
-function _findPath() {
-  _findPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee13(accessKeys) {
-    var keys, i, publicKey;
-    return regeneratorRuntime.wrap(function _callee13$(_context13) {
-      while (1) {
-        switch (_context13.prev = _context13.next) {
-          case 0:
-            keys = getKeys();
-            i = 0;
-
-          case 2:
-            if (!(i < keys.length)) {
-              _context13.next = 11;
-              break;
-            }
-
-            publicKey = 'ed25519:' + (0, _bs.encode)(Buffer.from(keys[i].publicKey));
-            console.log(accessKeys, publicKey, accessKeys.includes(publicKey));
-
-            if (!accessKeys.includes(publicKey)) {
-              _context13.next = 8;
-              break;
-            }
-
-            console.log({
-              publicKey: publicKey,
-              path: keys[i].path
-            });
-            return _context13.abrupt("return", {
-              publicKey: publicKey,
-              path: keys[i].path
-            });
-
-          case 8:
-            ++i;
-            _context13.next = 2;
-            break;
-
-          case 11:
-            return _context13.abrupt("return", {
-              publicKey: null,
-              path: null
-            });
-
-          case 12:
-          case "end":
-            return _context13.stop();
-        }
-      }
-    }, _callee13);
-  }));
-  return _findPath.apply(this, arguments);
 }
 
 function addPath() {
@@ -25345,58 +26162,58 @@ function addPath() {
 }
 
 function _addPath() {
-  _addPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee14() {
+  _addPath = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
     var btn, keys, path, client, publicKey;
-    return regeneratorRuntime.wrap(function _callee14$(_context14) {
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             btn = document.querySelector('#addPathBtn');
             btn.disabled = true;
             btn.innerHTML = '<div class="spinner-grow spinner-grow-sm" role="status">\n' + '  <span class="sr-only">Loading...</span>\n' + '</div>&nbsp;&nbsp;&nbsp;Checking ledger';
             document.getElementById('keysError').innerHTML = '';
-            keys = getKeys();
+            keys = utils.getKeys();
             path = document.querySelector('#path').value;
-            _context14.prev = 6;
-            _context14.next = 9;
+            _context10.prev = 6;
+            _context10.next = 9;
             return (0, _ledger.createLedgerU2FClient)();
 
           case 9:
-            client = _context14.sent;
-            _context14.next = 12;
+            client = _context10.sent;
+            _context10.next = 12;
             return client.getPublicKey(path);
 
           case 12:
-            publicKey = _context14.sent;
+            publicKey = _context10.sent;
             console.log(path, publicKey);
             keys.push({
               publicKey: publicKey,
               path: path
             });
             setKeys(keys);
-            _context14.next = 18;
+            _context10.next = 18;
             return loadKeys();
 
           case 18:
             btn.innerHTML = "add";
             btn.disabled = false;
-            _context14.next = 28;
+            _context10.next = 28;
             break;
 
           case 22:
-            _context14.prev = 22;
-            _context14.t0 = _context14["catch"](6);
-            document.getElementById('keysError').innerHTML = _context14.t0;
-            console.log(_context14.t0);
+            _context10.prev = 22;
+            _context10.t0 = _context10["catch"](6);
+            document.getElementById('keysError').innerHTML = _context10.t0;
+            console.log(_context10.t0);
             btn.innerHTML = "add";
             btn.disabled = false;
 
           case 28:
           case "end":
-            return _context14.stop();
+            return _context10.stop();
         }
       }
-    }, _callee14, null, [[6, 22]]);
+    }, _callee10, null, [[6, 22]]);
   }));
   return _addPath.apply(this, arguments);
 }
@@ -25409,11 +26226,13 @@ window.submitRequest = submitRequest;
 window.addPath = addPath;
 
 window.onhashchange = function () {
+  console.log(window.location.hash);
+
   if (window.location.hash) {
-    loadAccountDetails(window.location.hash.slice(1));
+    display(window.location.hash.slice(1));
   }
 };
-},{"regenerator-runtime":"node_modules/regenerator-runtime/runtime.js","near-api-js":"node_modules/near-api-js/lib/browser-index.js","bs58":"node_modules/bs58/index.js","mustache":"node_modules/mustache/mustache.js","./ledger.js":"ledger.js","buffer":"node_modules/buffer/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime":"node_modules/regenerator-runtime/runtime.js","near-api-js":"node_modules/near-api-js/lib/browser-index.js","bs58":"node_modules/bs58/index.js","mustache":"node_modules/mustache/mustache.js","./ledger.js":"ledger.js","./actions.js":"actions.js","./staking.js":"staking.js","./utils.js":"utils.js","buffer":"node_modules/buffer/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -25441,7 +26260,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63142" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64189" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
