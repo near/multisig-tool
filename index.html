@@ -241,7 +241,7 @@
             </div>
             <div class="col-12 col-lg-6 text-left justify-content-left">
               <div>
-                <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }} ', 'num_confirmations')">Change</button>
+                <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }}', 'num_confirmations')">Change</button>
               </div>
             </div>
           </div>
@@ -293,60 +293,61 @@
           <hr />
           <br />
 
-          <!--
-          <p>Create new multisig account:</p>
-
-          <div class="row mb-4 justify-content-left">
-            <div class="col-12 col-lg-6 d-flex">
-              <div class="form-outline mb-4 w-100">
-                <input class="form-control" type="text" id="multisig-account-id" placeholder="Account Id" />
-                <label class="form-label" for="multisig-account-id">Account Id</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 text-left justify-content-center">
-                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
-            </div>
-          </div>
-
-          <hr />
-          <br />
-
-          <p>Deploy lockup:</p>
-
-          <div class="row mb-4 justify-content-left">
-            <div class="col-12 col-lg-6 d-flex">
-              <div class="form-outline mb-4 w-100">
-                <input class="form-control" type="text" id="create-lockup-account-id" placeholder="Owner account for lockup contract" />
-                <label class="form-label" for="create-lockup-account-id">Owner account for lockup contract</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 d-flex">
-              <div class="form-outline mb-4 w-100">
-                <input class="form-control" type="text" id="create-lockup-amount" placeholder="Lockup amount in NEAR" />
-                <label class="form-label" for="create-lockup-amount">Lockup amount in NEAR</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 d-flex">
-              <div class="form-outline mb-4 w-100">
-                <input class="form-control" type="text" id="create-lockup-duration" placeholder="Lockup duration (in days)" />
-                <label class="form-label" for="create-lockup-duration">Lockup duration (in days)</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 d-flex">
-              <div class="form-outline mb-4 w-100">
-                <input type="checkbox" id="create-lockup-staking" placeholder="" checked />
-                <label for="create-lockup-staking">Enable staking</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-6 text-left justify-content-center">
-                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
-            </div>
-          </div>
-
-          -->
         </div>
       </div>
       </script>
+
+                <!--
+                          <p>Create new multisig account:</p>
+                
+                          <div class="row mb-4 justify-content-left">
+                            <div class="col-12 col-lg-6 d-flex">
+                              <div class="form-outline mb-4 w-100">
+                                <input class="form-control" type="text" id="multisig-account-id" placeholder="Account Id" />
+                                <label class="form-label" for="multisig-account-id">Account Id</label>
+                              </div>
+                            </div>
+                            <div class="col-12 col-lg-6 text-left justify-content-center">
+                                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
+                            </div>
+                          </div>
+                
+                          <hr />
+                          <br />
+                
+                          <p>Deploy lockup:</p>
+                
+                          <div class="row mb-4 justify-content-left">
+                            <div class="col-12 col-lg-6 d-flex">
+                              <div class="form-outline mb-4 w-100">
+                                <input class="form-control" type="text" id="create-lockup-account-id" placeholder="Owner account for lockup contract" />
+                                <label class="form-label" for="create-lockup-account-id">Owner account for lockup contract</label>
+                              </div>
+                            </div>
+                            <div class="col-12 col-lg-6 d-flex">
+                              <div class="form-outline mb-4 w-100">
+                                <input class="form-control" type="text" id="create-lockup-amount" placeholder="Lockup amount in NEAR" />
+                                <label class="form-label" for="create-lockup-amount">Lockup amount in NEAR</label>
+                              </div>
+                            </div>
+                            <div class="col-12 col-lg-6 d-flex">
+                              <div class="form-outline mb-4 w-100">
+                                <input class="form-control" type="text" id="create-lockup-duration" placeholder="Lockup duration (in days)" />
+                                <label class="form-label" for="create-lockup-duration">Lockup duration (in days)</label>
+                              </div>
+                            </div>
+                            <div class="col-12 col-lg-6 d-flex">
+                              <div class="form-outline mb-4 w-100">
+                                <input type="checkbox" id="create-lockup-staking" placeholder="" checked />
+                                <label for="create-lockup-staking">Enable staking</label>
+                              </div>
+                            </div>
+                            <div class="col-12 col-lg-6 text-left justify-content-center">
+                                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
+                            </div>
+                          </div>
+                
+                          -->
 
       <script id="template-staking" type="x-tmpl-mustache">
       <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}'">Back</button>

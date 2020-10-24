@@ -40,6 +40,7 @@ function funcCall(methodName, args, deposit, gas) {
 }
 
 async function addKey(contract) {
+    let accountId = contract.accountId;
     let publicKeyStr = document.querySelector('#new-key').value;
     // check it's a valid key.
     let publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
@@ -63,6 +64,7 @@ async function addKey(contract) {
 }
 
 async function transfer(contract) {
+    let accountId = contract.accountId;
     let receiverId = document.querySelector('#transfer-receiver').value;
     if (!await utils.accountExists(window.near.connection, receiverId)) {
         alert(`Account ${receiverId} doesn't exist`);
@@ -82,6 +84,7 @@ async function transfer(contract) {
 }
 
 async function setNumConfirmations(contract) {
+    let accountId = contract.accountId;
     let numConfirmations = document.querySelector('#num-confirmations').value;
     try {
         numConfirmations = parseInt(numConfirmations);
@@ -110,6 +113,7 @@ async function setNumConfirmations(contract) {
 }
 
 async function vestingTermination(contract, requestKind) {
+    let accountId = contract.accountId;
     let lockupAccountId = document.querySelector('#lockup-account-id').value;
     if (!await utils.accountExists(window.near.connection, lockupAccountId)) {
         alert(`Account ${lockupAccountId} doesn't exist`);
