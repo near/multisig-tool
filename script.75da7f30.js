@@ -24887,16 +24887,17 @@ function addKey(_x2) {
 
 function _addKey() {
   _addKey = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(contract) {
-    var publicKeyStr, publicKey;
+    var accountId, publicKeyStr, publicKey;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
+            accountId = contract.accountId;
             publicKeyStr = document.querySelector('#new-key').value; // check it's a valid key.
 
             publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
             console.log("Add ".concat(publicKey.toString(), " key"));
-            _context4.next = 5;
+            _context4.next = 6;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: accountId,
@@ -24912,7 +24913,7 @@ function _addKey() {
               }
             });
 
-          case 5:
+          case 6:
           case "end":
             return _context4.stop();
         }
@@ -24928,29 +24929,30 @@ function transfer(_x3) {
 
 function _transfer() {
   _transfer = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(contract) {
-    var receiverId, amount;
+    var accountId, receiverId, amount;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
+            accountId = contract.accountId;
             receiverId = document.querySelector('#transfer-receiver').value;
-            _context5.next = 3;
+            _context5.next = 4;
             return utils.accountExists(window.near.connection, receiverId);
 
-          case 3:
+          case 4:
             if (_context5.sent) {
-              _context5.next = 6;
+              _context5.next = 7;
               break;
             }
 
             alert("Account ".concat(receiverId, " doesn't exist"));
             return _context5.abrupt("return");
 
-          case 6:
+          case 7:
             amount = document.querySelector('#transfer-amount').value;
             console.log("Send from ".concat(accountId, " to ").concat(receiverId, " ").concat(amount));
             amount = utils.parseAmount(amount);
-            _context5.next = 11;
+            _context5.next = 12;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: receiverId,
@@ -24961,7 +24963,7 @@ function _transfer() {
               }
             });
 
-          case 11:
+          case 12:
           case "end":
             return _context5.stop();
         }
@@ -24977,50 +24979,51 @@ function setNumConfirmations(_x4) {
 
 function _setNumConfirmations() {
   _setNumConfirmations = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(contract) {
-    var numConfirmations, accessKeys;
+    var accountId, numConfirmations, accessKeys;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
+            accountId = contract.accountId;
             numConfirmations = document.querySelector('#num-confirmations').value;
-            _context6.prev = 1;
+            _context6.prev = 2;
             numConfirmations = parseInt(numConfirmations);
-            _context6.next = 9;
+            _context6.next = 10;
             break;
 
-          case 5:
-            _context6.prev = 5;
-            _context6.t0 = _context6["catch"](1);
+          case 6:
+            _context6.prev = 6;
+            _context6.t0 = _context6["catch"](2);
             alert(_context6.t0);
             return _context6.abrupt("return");
 
-          case 9:
-            _context6.next = 11;
+          case 10:
+            _context6.next = 12;
             return contract.getAccessKeys();
 
-          case 11:
+          case 12:
             accessKeys = _context6.sent;
             console.log("Change ".concat(accountId, " to ").concat(numConfirmations, " of ").concat(accessKeys.length, " multisig"));
 
             if (!(numConfirmations + 1 > accessKeys.length)) {
-              _context6.next = 16;
+              _context6.next = 17;
               break;
             }
 
             alert("Dangerously high number of confirmations. Set lower or add more keys");
             return _context6.abrupt("return");
 
-          case 16:
+          case 17:
             if (!(numConfirmations < 1)) {
-              _context6.next = 19;
+              _context6.next = 20;
               break;
             }
 
             alert('Min num confirmations is 1');
             return _context6.abrupt("return");
 
-          case 19:
-            _context6.next = 21;
+          case 20:
+            _context6.next = 22;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: accountId,
@@ -25031,12 +25034,12 @@ function _setNumConfirmations() {
               }
             });
 
-          case 21:
+          case 22:
           case "end":
             return _context6.stop();
         }
       }
-    }, _callee6, null, [[1, 5]]);
+    }, _callee6, null, [[2, 6]]);
   }));
   return _setNumConfirmations.apply(this, arguments);
 }
@@ -25047,38 +25050,39 @@ function vestingTermination(_x5, _x6) {
 
 function _vestingTermination() {
   _vestingTermination = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(contract, requestKind) {
-    var lockupAccountId, lockupAccount;
+    var accountId, lockupAccountId, lockupAccount;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
+            accountId = contract.accountId;
             lockupAccountId = document.querySelector('#lockup-account-id').value;
-            _context7.next = 3;
+            _context7.next = 4;
             return utils.accountExists(window.near.connection, lockupAccountId);
 
-          case 3:
+          case 4:
             if (_context7.sent) {
-              _context7.next = 6;
+              _context7.next = 7;
               break;
             }
 
             alert("Account ".concat(lockupAccountId, " doesn't exist"));
             return _context7.abrupt("return");
 
-          case 6:
-            _context7.next = 8;
+          case 7:
+            _context7.next = 9;
             return window.near.account(lockupAccountId);
 
-          case 8:
+          case 9:
             lockupAccount = _context7.sent;
             console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
 
             if (!(requestKind === "terminate_vesting")) {
-              _context7.next = 15;
+              _context7.next = 16;
               break;
             }
 
-            _context7.next = 13;
+            _context7.next = 14;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -25086,17 +25090,17 @@ function _vestingTermination() {
               }
             });
 
-          case 13:
-            _context7.next = 18;
+          case 14:
+            _context7.next = 19;
             break;
 
-          case 15:
+          case 16:
             if (!(requestKind === "termination_withdraw")) {
-              _context7.next = 18;
+              _context7.next = 19;
               break;
             }
 
-            _context7.next = 18;
+            _context7.next = 19;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -25106,7 +25110,7 @@ function _vestingTermination() {
               }
             });
 
-          case 18:
+          case 19:
           case "end":
             return _context7.stop();
         }
@@ -26260,7 +26264,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64189" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58865" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
