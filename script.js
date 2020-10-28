@@ -155,7 +155,7 @@ async function confirmRequest(accountId, requestId) {
   let contract = await window.near.account(accountId);
   try {
     await actions.setAccountSigner(contract);
-    await contract.functionCall(accountId, 'confirm', {request_id: requestId}, '150000000000000');
+    await contract.functionCall(accountId, 'confirm', {request_id: requestId}, '300000000000000');
   } catch (error) {
     console.log(error);
     alert(error);
