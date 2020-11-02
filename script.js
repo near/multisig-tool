@@ -209,7 +209,7 @@ async function addPath() {
       publicKey,
       path
     });
-    setKeys(keys);
+    utils.setKeys(keys);
     await loadKeys();
     btn.innerHTML = "add";
     btn.disabled = false;
