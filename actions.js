@@ -39,12 +39,16 @@ function funcCall(methodName, args, deposit, gas) {
     };
 }
 
-async function addKey(contract) {
+async function addKey(contract, requestOnly) {
     let accountId = contract.accountId;
     let publicKeyStr = document.querySelector('#new-key').value;
     // check it's a valid key.
     let publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
     console.log(`Add ${publicKey.toString()} key`);
+    let methodNames = ['add_request', 'add_request_and_confirm', 'confirm', 'delete_request'];
+    if (requestOnly) {
+        methodNames = ['add_request'];
+    }
     await contract.functionCall(accountId, 'add_request', {
         request: {
             receiver_id: accountId,
@@ -55,7 +59,7 @@ async function addKey(contract) {
                     permission: {
                         allowance: null,
                         receiver_id: accountId,
-                        method_names: ['add_request', 'add_request_and_confirm', 'confirm', 'delete_request'],
+                        method_names: methodNames,
                     }
                 }
             ]
@@ -63,7 +67,20 @@ async function addKey(contract) {
     })
 }
 
-async function transfer(contract) {
+async function lockupEnableTransfer(contract) {
+    const accountId = contract.accountId;
+    const lockupAccountId = utils.accountToLockup(utils.LOCKUP_BASE, accountId);
+    await contract.functionCall(accountId, 'add_request', {
+        request: {
+            receiver_id: lockupAccountId,
+            actions: [
+                funcCall("check_transfers_vote", {})
+            ]
+        }
+    });
+}
+
+async function transfer(contract, isLockup) {
     let accountId = contract.accountId;
     let receiverId = document.querySelector('#transfer-receiver').value;
     if (!await utils.accountExists(window.near.connection, receiverId)) {
@@ -73,14 +90,26 @@ async function transfer(contract) {
     let amount = document.querySelector('#transfer-amount').value;
     console.log(`Send from ${accountId} to ${receiverId} ${amount}`);
     amount = utils.parseAmount(amount);
-    await contract.functionCall(accountId, 'add_request', {
-        request: {
-            receiver_id: receiverId,
-            actions: [
-                { type: "Transfer", amount }
-            ]
-        }
-    });
+    if (isLockup) {
+        const lockupAccountId = utils.accountToLockup(utils.LOCKUP_BASE, accountId);
+        await contract.functionCall(accountId, 'add_request', {
+            request: {
+                receiver_id: lockupAccountId,
+                actions: [
+                    funcCall("transfer", { receiver_id: receiverId })
+                ]
+            }
+        });
+    } else {
+        await contract.functionCall(accountId, 'add_request', {
+            request: {
+                receiver_id: receiverId,
+                actions: [
+                    { type: "Transfer", amount }
+                ]
+            }
+        });
+    }
 }
 
 async function setNumConfirmations(contract) {
@@ -171,10 +200,10 @@ async function submitRequest(accountId, requestKind) {
     let contract = await window.near.account(accountId);
     try {
         await setAccountSigner(contract);
-        if (requestKind === "add_key") {
-            await addKey(contract);
-        } else if (requestKind === "transfer") {
-            await transfer(contract);
+        if (requestKind === "add_key" || requestKind === "add_request_key") {
+            await addKey(contract, requestKind === "add_request_key");
+        } else if (requestKind === "transfer" || requestKind === "transfer_lockup") {
+            await transfer(contract, requestKind === "transfer_lockup");
         } else if (requestKind === "num_confirmations") {
             await setNumConfirmations(contract);
         } else if (requestKind === "terminate_vesting" || requestKind === "termination_withdraw") {

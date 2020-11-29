@@ -1,6 +1,9 @@
 import * as nearAPI from 'near-api-js';
 
+import sha256 from 'js-sha256';
 import { encode, decode } from 'bs58';
+
+const LOCKUP_BASE = 'lockup.near';
 
 async function accountExists(connection, accountId) {
     try {
@@ -47,10 +50,26 @@ async function findPath(accessKeys) {
     return { publicKey: null, path: null };
 }
 
+function accountToLockup(masterAccountId, accountId) {
+    return `${sha256(Buffer.from(accountId)).toString('hex').slice(0, 40)}.${masterAccountId}`;
+}
+
+async function lockupStatus(account, lockupAccountId) {
+    let lockupBalance = await account.viewFunction(lockupAccountId, 'get_balance');
+    let lockupTransferEnabled = await account.viewFunction(lockupAccountId, 'are_transfers_enabled');
+    return {
+        lockupBalance,
+        lockupTransferEnabled
+    };
+}
+
 module.exports = {
     accountExists,
     parseAmount,
     getKeys,
     setKeys,
     findPath,
+    accountToLockup,
+    lockupStatus,
+    LOCKUP_BASE
 }

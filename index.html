@@ -149,13 +149,22 @@
         <div class="card-body">
         <h5 class="card-title">Account: {{ accountId }}</h5>
         <p class="card-text">
-        <p>Num confirmations: {{ numConfirmations }}</p>
-        <p>Keys</p>
-        <ul class="list-group">
-        {{#accessKeys}}
-          <li class="list-group-item">{{ public_key }}</li>
-        {{/accessKeys}}
-        </ul>
+          <p>Balance: {{ balance }}</p>
+          {{#lockupBalance}}
+            <p>
+              Balance lockup: {{ lockupBalance }}
+              {{#lockupTransferDisabled}}
+                <button type="button" class="btn btn-warning" onclick="submitRequest('{{ accountId }}', 'transfer_lockup_enable')">Enable lockup transfers</button>
+              {{/lockupTransferDisabled}}
+            </p>
+          {{/lockupBalance}}
+          <p>Num confirmations: {{ numConfirmations }}</p>
+          <p>Keys</p>
+          <table class="table">
+          {{#accessKeys}}
+            <tr><td>{{ public_key }}</td><td>{{ access_key.permission.FunctionCall.method_names }}</td></tr>
+          {{/accessKeys}}
+          </table>
         <br />
         <br />
         <h3>Requests</h3>
@@ -198,7 +207,8 @@
             </div>
             <div class="col">
               <div>
-                <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }}', 'add_key')">Add</button>
+                <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }}', 'add_key')">Add request & confirm</button>
+                <button type="button" class="btn btn-warning" onclick="submitRequest('{{ accountId }}', 'add_request_key')">Add request only</button>
               </div>
             </div>
           </div>
@@ -220,9 +230,14 @@
                 <label class="form-label" for="transfer-amount">Amount in NEAR</label>
               </div>
             </div>
-            <div class="col">
+            <div class="col-12 col-lg-6 text-left justify-content-left">
               <div>
                 <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }}', 'transfer')">Transfer</button>
+                {{#lockupBalance}}
+                  {{#lockupTransferEnabled}}
+                  <button type="button" class="btn btn-warning" onclick="submitRequest('{{ accountId }}', 'transfer_lockup')">Transfer from lockup</button>
+                  {{/lockupTransferEnabled}}
+                {{/lockupBalance}}
               </div>
             </div>
           </div>

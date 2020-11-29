@@ -102,11 +102,18 @@ async function loadAccountDetails(accountId) {
     await loadAccounts();
   }
   let contract = await window.near.account(accountId);
+  const balance = nearAPI.utils.format.formatNearAmount((await contract.state()).amount, 2);
   const numConfirmations = await contract.viewFunction(accountId, "get_num_confirmations", {});
   const accessKeys = await contract.getAccessKeys();
-  console.log(accessKeys);
   const request_ids = await contract.viewFunction(accountId, "list_request_ids", {});
   let requests = [];
+  const lockupAccountId = utils.accountToLockup(utils.LOCKUP_BASE, accountId);
+  let lockupBalance = null, lockupTransferEnabled = true;
+  if (await utils.accountExists(window.near.connection, lockupAccountId)) {
+    ({ lockupBalance, lockupTransferEnabled } = await utils.lockupStatus(contract, lockupAccountId));
+    lockupBalance = nearAPI.utils.format.formatNearAmount(lockupBalance, 2);
+  }
+  console.log(accessKeys, lockupBalance, lockupTransferEnabled);
   for (let i = 0; i < request_ids.length; ++i) {
     let details = await contract.viewFunction(accountId, "get_request", {request_id: request_ids[i]});
     let confirms = await contract.viewFunction(accountId, "get_confirmations", {request_id: request_ids[i]});
@@ -142,8 +149,12 @@ async function loadAccountDetails(accountId) {
   document.getElementById('requests').innerHTML = Mustache.render(template, {
     accountId,
     accessKeys,
+    balance,
+    lockupBalance,
+    lockupTransferEnabled,
+    lockupTransferDisabled: !lockupTransferEnabled,
     numConfirmations,
-    requests
+    requests,
   });
   document.querySelectorAll('.form-outline').forEach((formOutline) => {
     new window.mdb.Input(formOutline).init();
