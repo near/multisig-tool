@@ -1,7 +1,7 @@
 const presets = [];
 const plugins = [["@babel/plugin-syntax-optional-chaining"]];
 
-if (process.env["ENV"] === "prod") {
+if (process.env.NODE_ENV === "production") {
   // plugins.push(...);
 }
 
