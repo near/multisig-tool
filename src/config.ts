@@ -1,6 +1,17 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME || "near-4ire";
+const CONTRACT_NAME = process.env.CONTRACT_NAME || "";
 
-export default function getConfig(env: any) {
+interface config {
+  networkId: string;
+  nodeUrl: string;
+  contractName: string;
+  walletUrl?: string;
+  helperUrl?: string;
+  explorerUrl?: string;
+  keyPath?: string;
+  masterAccount?: string;
+}
+
+const getConfig = (env: string): config => {
   switch (env) {
     case "production":
     case "mainnet":
@@ -59,6 +70,6 @@ export default function getConfig(env: any) {
         `Unconfigured environment '${env}'. Can be configured in src/config.js.`
       );
   }
-}
+};
 
-module.exports = getConfig;
+export default getConfig;

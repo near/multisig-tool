@@ -6,6 +6,7 @@ import App from "./App";
 import store from "./store";
 import reportWebVitals from "./reportWebVitals";
 import { init } from "./utils";
+import "antd/dist/antd.css";
 
 window.nearInitPromise = init().then(() => {
   ReactDOM.render(

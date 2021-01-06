@@ -1,11 +1,13 @@
-import React from "react";
+import React, { FC, ReactElement } from "react";
+import { Layout } from "antd";
+import Header from "./components/header";
 
-function App() {
+const App: FC = (): ReactElement => {
   return (
-    <div>
-      <button disabled></button>
-    </div>
+    <Layout>
+      <Header />
+    </Layout>
   );
-}
+};
 
 export default App;

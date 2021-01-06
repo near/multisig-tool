@@ -2,9 +2,9 @@ export {};
 
 declare global {
   interface Window {
-    nearInitPromise: object;
+    nearInitPromise: any;
     contract: any;
-    accountId: object;
+    accountId: any;
     walletConnection: {
       isSignedIn: any;
       signOut: any;
