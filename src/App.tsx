@@ -1,11 +1,12 @@
-import React from "react";
-import "./App.css";
+import React, { FC, ReactElement } from "react";
+import { Layout } from "antd";
+import Header from "./components/header";
 
-const App = () => {
+const App: FC = (): ReactElement => {
   return (
-    <div className="App">
-      <button type="submit">Log in</button>
-    </div>
+    <Layout>
+      <Header />
+    </Layout>
   );
 };
 

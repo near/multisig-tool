@@ -5,15 +5,19 @@ import "./index.css";
 import App from "./App";
 import store from "./store";
 import reportWebVitals from "./reportWebVitals";
+import { init } from "./utils";
+import "antd/dist/antd.css";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById("root")
-);
+window.nearInitPromise = init().then(() => {
+  ReactDOM.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </React.StrictMode>,
+    document.getElementById("root")
+  );
+});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
