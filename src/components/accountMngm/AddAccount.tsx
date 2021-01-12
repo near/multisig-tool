@@ -1,10 +1,12 @@
 import React, { FC, ReactElement, useState } from "react";
-import { Input, Button, Select } from "antd";
-import { addAccount } from "../../utils";
+import { Input, Button, Select, Row, Col } from "antd";
 
 const { Option } = Select;
+interface Props {
+  addAccount: (arg: string) => void;
+}
 
-const AddAccount: FC = (): ReactElement => {
+const AddAccount: FC<Props> = ({ addAccount }): ReactElement => {
   const [account, setAccount] = useState("");
   const [net, setNet] = useState(".near");
 
@@ -31,14 +33,20 @@ const AddAccount: FC = (): ReactElement => {
 
   return (
     <>
-      <Input
-        addonAfter={selectAfter}
-        placeholder="Enter Account"
-        onChange={handleOnChange}
-      />
-      <Button type="primary" onClick={handleAddAccount}>
-        Add Account
-      </Button>
+      <Row justify="center" gutter={[24, 24]}>
+        <Col span={6}>
+          <Input
+            addonAfter={selectAfter}
+            placeholder="Enter Account"
+            onChange={handleOnChange}
+          />
+        </Col>
+        <Col>
+          <Button type="primary" onClick={handleAddAccount}>
+            Add Account
+          </Button>
+        </Col>
+      </Row>
     </>
   );
 };

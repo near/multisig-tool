@@ -43,24 +43,27 @@ const getAccounts = () => {
   return accountIds ? accountIds.split(",") : [];
 };
 
-const loadAccounts = async () => {
+export const loadAccounts = async () => {
   const accountIds = getAccounts();
-  const accounts: { accountId: any; amount: any }[] = [];
 
-  accountIds.map(async (acc) => {
-    try {
-      const account = await window.near.account(acc);
-      const state = await account.state();
+  return Promise.all(
+    accountIds.map(async (acc) => {
+      let result;
+      try {
+        const account = await window.near.account(acc);
+        const state = await account.state();
 
-      accounts.push({
-        accountId: account,
-        amount: utils.format.formatNearAmount(state.amount, 2),
-      });
-    } catch (error) {
-      console.log(error);
-    }
-    return accounts;
-  });
+        result = {
+          accountId: account.accountId,
+          amount: utils.format.formatNearAmount(state.amount, 2),
+        };
+      } catch (error) {
+        console.log(error);
+      }
+
+      return result;
+    })
+  );
 };
 
 const setAccounts = (accountIds: string[]): void => {
@@ -75,6 +78,12 @@ export const addAccount = async (accountId: string) => {
   }
   await loadAccounts();
   window.hash = accountId;
+};
+
+export const isUserLoggedIn = (): boolean => {
+  const auth = JSON.parse(localStorage.getItem("null_wallet_auth_key") || "{}");
+
+  return Boolean(auth?.accountId);
 };
 
 // TODO Decide should we use class
