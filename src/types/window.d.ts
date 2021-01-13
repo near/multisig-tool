@@ -5,6 +5,8 @@ declare global {
     nearInitPromise: any;
     contract: any;
     accountId: any;
+    hash: string;
+    near: any;
     walletConnection: {
       isSignedIn: any;
       signOut: any;
