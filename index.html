@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.853e66ee.js" defer></script></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.2ec7ad50.js" defer></script></head><body>
 <div class="container fluid"> <div class="row"> <div class="col-md-8 col-xs-12 mx-auto"> <div class="card"> <div class="card-body"> <h2 class="card-title text-center">Tool to manage multisigs</h2> <hr> <p class="mb-0 text-center"> This is temporary until NEAR Wallet adds this functionality </p> </div> </div> <br> <div class="card"> <div class="card-body"> <h5 class="card-title">Keys</h5> <p class="card-text"> <ul class="list-group list-group-flush"> <script id="template-keys" type="x-tmpl-mustache">
               {{#keys}}
                   <li class="list-group-item"> <input class="form-check-input mr-1" type="checkbox" value="" aria-label="{{ publicKey }}
@@ -185,37 +185,63 @@
             <p class="card-text">
             </p>
 
-            <div>
-              <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
-                <option></option>
-                {{#pools}}
-                  <option value="{{ accountId }}">{{ accountId }} -- {{ fee }} -- {{ stake }}</option>
-                {{/pools}}
-              </select>
-              <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+            <div class="row mb-4">
+                <label class="form-label" for="select-pool-id">Select or Enter Pool Id</label>
+              <div class="col-12 col-lg-6 text-left justify-content-center">
+                <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
+                  <option></option>
+                  {{#pools}}
+                    <option value="{{ poolId }}">{{ poolId }} -- {{ fee }} -- {{ stake }}</option>
+                  {{/pools}}
+                </select>
+                <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+              </div>
+
             </div>
 
-            <div class="col-12 col-lg-6 text-left justify-content-center">
-              <table>
-                <tr>
-                  <td>Pool Id</td>
-                  <td>Staked</td>
-                  <td>Unstaked</td>
-                </tr>
-                {{#staking}}
+            <div class="row mb-4">
+              <div class="col d-flex w-100">
+                <div class="form-outline mb-4 w-100">
+                  <input class="form-control" type="text" id="stake-amount" placeholder="Amount in NEAR">
+                  <label class="form-label" for="stake-amount">Amount in NEAR</label>
+                </div>
+              </div>
+              <div class="col-12 col-lg-6 text-left justify-content-left">
+                <div>
+                  <button type="button" class="btn btn-primary" onclick="depositAndStake('{{ accountId }}')">Despoit & Stake</button>
+                  <button type="button" class="btn btn-primary" onclick="unstake('{{ accountId }}')">Unstake</button>
+                  <button type="button" class="btn btn-primary" onclick="stakeWithdraw('{{ accountId }}')">Withdraw</button>
+                </div>
+              </div>
+              
+            </div>
+
+            <hr />
+            <br />
+
+            <div class="row mb-4">
+              <div class="col-12 col-lg-6 text-left justify-content-center">
+                <table>
                   <tr>
-                    <td>{{ poolId }}</td>
-                    <td>{{ totalStaked }}</td>
-                    <td>{{ totalUnstaked }}</td>
-                    <td>
-                      <button type="button" class="btn btn-primary" onclick='unstakeAll("{{ accountId }}", "{{ poolId }}")'>Unstake all</button>
-                      <button type="button" class="btn btn-danger" onclick='withdrawAll("{{ accountId }}", "{{ poolId }}")'>Withdraw all</button>
-                    </td>
+                    <td>Pool Id</td>
+                    <td>Staked</td>
+                    <td>Unstaked</td>
                   </tr>
-                {{/staking}}
-              </table>
+                  {{#staking}}
+                    <tr>
+                      <td>{{ poolId }}</td>
+                      <td>{{ totalStaked }}</td>
+                      <td>{{ totalUnstaked }}</td>
+                      <td>
+                        <button type="button" class="btn btn-primary" onclick='unstakeAll("{{ accountId }}", "{{ poolId }}")'>Unstake all</button>
+                        <button type="button" class="btn btn-danger" onclick='withdrawAll("{{ accountId }}", "{{ poolId }}")'>Withdraw all</button>
+                      </td>
+                    </tr>
+                  {{/staking}}
+                </table>
+              </div>
             </div>
           </div>
         </div>
-      </script> <div id="requests"></div> <footer class="bg-light text-center text-lg-left">  <div class="text-center p-3" style="background-color:rgba(0,0,0,.2);"> © 2020 Copyright: <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a> </div>  </footer> </div> </div>
+      </script> <div id="requests"></div> <footer class="bg-light text-center text-lg-left">  <div class="text-center p-3" style="background-color:rgba(0,0,0,.2);"> © 2021 Copyright: <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a> </div>  </footer> </div> </div>
 </div> </body></html><script>document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".form-outline").forEach(function(n){new window.mdb.Input(n).init()})});</script>

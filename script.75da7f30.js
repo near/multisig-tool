@@ -24924,7 +24924,7 @@ function funcCall(methodName, args, deposit, gas) {
   return {
     "type": "FunctionCall",
     "method_name": methodName,
-    "args": btoa(JSON.stringify(args)),
+    "args": btoa(JSON.stringify(args ? args : {})),
     "deposit": deposit ? deposit : '0',
     "gas": gas ? gas : '100000000000000'
   };
@@ -25585,7 +25585,7 @@ function _loadAccountStaking() {
                 }, _callee3);
               }));
 
-              return function (_x7) {
+              return function (_x15) {
                 return _ref3.apply(this, arguments);
               };
             }()));
@@ -25607,108 +25607,180 @@ function _loadAccountStaking() {
   return _loadAccountStaking.apply(this, arguments);
 }
 
-function withdrawAll(_x3, _x4) {
-  return _withdrawAll.apply(this, arguments);
+function poolRequest(_x3, _x4, _x5, _x6, _x7) {
+  return _poolRequest.apply(this, arguments);
 }
 
-function _withdrawAll() {
-  _withdrawAll = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(accountId, poolId) {
-    var masterAccount;
+function _poolRequest() {
+  _poolRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(accountId, poolId, action, args, deposit) {
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _context5.next = 2;
-            return window.near.account(accountId);
-
-          case 2:
-            masterAccount = _context5.sent;
-            _context5.prev = 3;
-            _context5.next = 6;
+            console.log("from ".concat(accountId, " to ").concat(poolId, ".").concat(action, "(").concat(args, ") with ").concat(deposit, "N"));
+            amount = utils.parseAmount(amount);
+            _context5.prev = 2;
+            _context5.next = 5;
             return (0, _actions.setAccountSigner)(masterAccount);
 
-          case 6:
-            _context5.next = 8;
+          case 5:
+            _context5.next = 7;
             return masterAccount.functionCall(accountId, "add_request", {
               request: {
                 receiver_id: poolId,
-                actions: [(0, _actions.funcCall)("withdraw_all", {})]
+                actions: [(0, _actions.funcCall)(action, args, deposit)]
               }
             });
 
-          case 8:
-            _context5.next = 14;
+          case 7:
+            _context5.next = 13;
             break;
 
-          case 10:
-            _context5.prev = 10;
-            _context5.t0 = _context5["catch"](3);
+          case 9:
+            _context5.prev = 9;
+            _context5.t0 = _context5["catch"](2);
             console.error(_context5.t0);
             alert(_context5.t0);
 
-          case 14:
+          case 13:
             loadAccountStaking(accountId);
 
-          case 15:
+          case 14:
           case "end":
             return _context5.stop();
         }
       }
-    }, _callee5, null, [[3, 10]]);
+    }, _callee5, null, [[2, 9]]);
   }));
+  return _poolRequest.apply(this, arguments);
+}
+
+function withdrawAll(_x8, _x9) {
   return _withdrawAll.apply(this, arguments);
 }
 
-function unstakeAll(_x5, _x6) {
-  return _unstakeAll.apply(this, arguments);
-}
-
-function _unstakeAll() {
-  _unstakeAll = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(accountId, poolId) {
-    var masterAccount;
+function _withdrawAll() {
+  _withdrawAll = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(accountId, poolId) {
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
             _context6.next = 2;
-            return window.near.account(accountId);
+            return poolRequest(accountId, poolId, "withdraw_all", {});
 
           case 2:
-            masterAccount = _context6.sent;
-            _context6.prev = 3;
-            _context6.next = 6;
-            return (0, _actions.setAccountSigner)(masterAccount);
-
-          case 6:
-            _context6.next = 8;
-            return masterAccount.functionCall(accountId, "add_request", {
-              request: {
-                receiver_id: poolId,
-                actions: [(0, _actions.funcCall)("unstake_all", {})]
-              }
-            });
-
-          case 8:
-            _context6.next = 14;
-            break;
-
-          case 10:
-            _context6.prev = 10;
-            _context6.t0 = _context6["catch"](3);
-            console.error(_context6.t0);
-            alert(_context6.t0);
-
-          case 14:
-            loadAccountStaking(accountId);
-
-          case 15:
           case "end":
             return _context6.stop();
         }
       }
-    }, _callee6, null, [[3, 10]]);
+    }, _callee6);
+  }));
+  return _withdrawAll.apply(this, arguments);
+}
+
+function unstakeAll(_x10, _x11) {
+  return _unstakeAll.apply(this, arguments);
+}
+
+function _unstakeAll() {
+  _unstakeAll = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(accountId, poolId) {
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            _context7.next = 2;
+            return poolRequest(accountId, poolId, "unstake_all", {});
+
+          case 2:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
   }));
   return _unstakeAll.apply(this, arguments);
+}
+
+function depositAndStake(_x12) {
+  return _depositAndStake.apply(this, arguments);
+}
+
+function _depositAndStake() {
+  _depositAndStake = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(accountId) {
+    var poolId, amount;
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            poolId = document.querySelector('#select-pool-id').value;
+            amount = document.querySelector('#transfer-amount').value;
+            _context8.next = 4;
+            return poolRequest(accountId, poolId, "deposit_and_stake", {}, amount);
+
+          case 4:
+          case "end":
+            return _context8.stop();
+        }
+      }
+    }, _callee8);
+  }));
+  return _depositAndStake.apply(this, arguments);
+}
+
+function unstake(_x13) {
+  return _unstake.apply(this, arguments);
+}
+
+function _unstake() {
+  _unstake = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(accountId) {
+    var poolId, amount;
+    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            poolId = document.querySelector('#select-pool-id').value;
+            amount = document.querySelector('#transfer-amount').value;
+            _context9.next = 4;
+            return poolRequest(accountId, poolId, "unstake", {
+              amount: utils.parseAmount(amount)
+            });
+
+          case 4:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return _unstake.apply(this, arguments);
+}
+
+function stakeWithdraw(_x14) {
+  return _stakeWithdraw.apply(this, arguments);
+}
+
+function _stakeWithdraw() {
+  _stakeWithdraw = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10(accountId) {
+    var poolId, amount;
+    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      while (1) {
+        switch (_context10.prev = _context10.next) {
+          case 0:
+            poolId = document.querySelector('#select-pool-id').value;
+            amount = document.querySelector('#transfer-amount').value;
+            _context10.next = 4;
+            return poolRequest(accountId, poolId, "withdraw", {
+              amount: utils.parseAmount(amount)
+            });
+
+          case 4:
+          case "end":
+            return _context10.stop();
+        }
+      }
+    }, _callee10);
+  }));
+  return _stakeWithdraw.apply(this, arguments);
 }
 
 module.exports = {
@@ -25716,6 +25788,9 @@ module.exports = {
 };
 window.withdrawAll = withdrawAll;
 window.unstakeAll = unstakeAll;
+window.depositAndStake = depositAndStake;
+window.unstake = unstake;
+window.stakeWithdraw = stakeWithdraw;
 },{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","mustache":"node_modules/mustache/mustache.js","./actions":"actions.js"}],"script.js":[function(require,module,exports) {
 var Buffer = require("buffer").Buffer;
 "use strict";
@@ -26404,7 +26479,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51014" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62022" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
