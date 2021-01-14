@@ -9,15 +9,20 @@ const AccountMngm: FC = (): ReactElement => {
   >([]);
 
   useEffect(() => {
-    loadAccounts().then((res) => {
-      setData(res);
+    loadAccounts().then((accounts) => {
+      if (accounts) {
+        setData(accounts);
+      }
     });
   }, []);
 
   const handleAddAccount = async (value: string) => {
     await addAccount(value);
     const accounts = await loadAccounts();
-    setData(accounts);
+
+    if (accounts) {
+      setData(accounts);
+    }
   };
 
   return (
