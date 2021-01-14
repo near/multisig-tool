@@ -50,14 +50,15 @@ async function loadAccountStaking(accountId) {
     });
 }
 
-async function withdrawAll(accountId, poolId) {
-    let masterAccount = await window.near.account(accountId);
+async function poolRequest(accountId, poolId, action, args, deposit) {
+    console.log(`from ${accountId} to ${poolId}.${action}(${args}) with ${deposit}N`);
+    amount = utils.parseAmount(amount);
     try {
         await setAccountSigner(masterAccount);
         await masterAccount.functionCall(accountId, "add_request", {
             request: {
                 receiver_id: poolId,
-                actions: [funcCall("withdraw_all", {})],
+                actions: [funcCall(action, args, deposit)],
             }
         });
     } catch (error) {
@@ -67,21 +68,30 @@ async function withdrawAll(accountId, poolId) {
     loadAccountStaking(accountId);
 }
 
+async function withdrawAll(accountId, poolId) {
+    await poolRequest(accountId, poolId, "withdraw_all", {});
+}
+
 async function unstakeAll(accountId, poolId) {
-    let masterAccount = await window.near.account(accountId);
-    try {
-        await setAccountSigner(masterAccount);
-        await masterAccount.functionCall(accountId, "add_request", {
-            request: {
-                receiver_id: poolId,
-                actions: [funcCall("unstake_all", {})],
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        alert(error);
-    }
-    loadAccountStaking(accountId);
+    await poolRequest(accountId, poolId, "unstake_all", {});
+}
+
+async function depositAndStake(accountId) {
+    const poolId = document.querySelector('#select-pool-id').value;
+    const amount = document.querySelector('#transfer-amount').value;
+    await poolRequest(accountId, poolId, "deposit_and_stake", {}, amount);
+}
+
+async function unstake(accountId) {
+    const poolId = document.querySelector('#select-pool-id').value;
+    const amount = document.querySelector('#transfer-amount').value;
+    await poolRequest(accountId, poolId, "unstake", { amount: utils.parseAmount(amount) });
+}
+
+async function stakeWithdraw(accountId) {
+    const poolId = document.querySelector('#select-pool-id').value;
+    const amount = document.querySelector('#transfer-amount').value;
+    await poolRequest(accountId, poolId, "withdraw", { amount: utils.parseAmount(amount) });
 }
 
 module.exports = {
@@ -90,3 +100,7 @@ module.exports = {
 
 window.withdrawAll = withdrawAll;
 window.unstakeAll = unstakeAll;
+window.depositAndStake = depositAndStake;
+window.unstake = unstake;
+window.stakeWithdraw = stakeWithdraw;
+

@@ -372,35 +372,61 @@
             <p class="card-text">
             </p>
 
-            <div>
-              <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
-                <option></option>
-                {{#pools}}
-                  <option value="{{ accountId }}">{{ accountId }} -- {{ fee }} -- {{ stake }}</option>
-                {{/pools}}
-              </select>
-              <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+            <div class="row mb-4">
+                <label class="form-label" for="select-pool-id">Select or Enter Pool Id</label>
+              <div class="col-12 col-lg-6 text-left justify-content-center">
+                <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
+                  <option></option>
+                  {{#pools}}
+                    <option value="{{ poolId }}">{{ poolId }} -- {{ fee }} -- {{ stake }}</option>
+                  {{/pools}}
+                </select>
+                <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+              </div>
+
             </div>
 
-            <div class="col-12 col-lg-6 text-left justify-content-center">
-              <table>
-                <tr>
-                  <td>Pool Id</td>
-                  <td>Staked</td>
-                  <td>Unstaked</td>
-                </tr>
-                {{#staking}}
+            <div class="row mb-4">
+              <div class="col d-flex w-100">
+                <div class="form-outline mb-4 w-100">
+                  <input class="form-control" type="text" id="stake-amount" placeholder="Amount in NEAR">
+                  <label class="form-label" for="stake-amount">Amount in NEAR</label>
+                </div>
+              </div>
+              <div class="col-12 col-lg-6 text-left justify-content-left">
+                <div>
+                  <button type="button" class="btn btn-primary" onclick="depositAndStake('{{ accountId }}')">Despoit & Stake</button>
+                  <button type="button" class="btn btn-primary" onclick="unstake('{{ accountId }}')">Unstake</button>
+                  <button type="button" class="btn btn-primary" onclick="stakeWithdraw('{{ accountId }}')">Withdraw</button>
+                </div>
+              </div>
+              
+            </div>
+
+            <hr />
+            <br />
+
+            <div class="row mb-4">
+              <div class="col-12 col-lg-6 text-left justify-content-center">
+                <table>
                   <tr>
-                    <td>{{ poolId }}</td>
-                    <td>{{ totalStaked }}</td>
-                    <td>{{ totalUnstaked }}</td>
-                    <td>
-                      <button type="button" class="btn btn-primary" onclick='unstakeAll("{{ accountId }}", "{{ poolId }}")'>Unstake all</button>
-                      <button type="button" class="btn btn-danger" onclick='withdrawAll("{{ accountId }}", "{{ poolId }}")'>Withdraw all</button>
-                    </td>
+                    <td>Pool Id</td>
+                    <td>Staked</td>
+                    <td>Unstaked</td>
                   </tr>
-                {{/staking}}
-              </table>
+                  {{#staking}}
+                    <tr>
+                      <td>{{ poolId }}</td>
+                      <td>{{ totalStaked }}</td>
+                      <td>{{ totalUnstaked }}</td>
+                      <td>
+                        <button type="button" class="btn btn-primary" onclick='unstakeAll("{{ accountId }}", "{{ poolId }}")'>Unstake all</button>
+                        <button type="button" class="btn btn-danger" onclick='withdrawAll("{{ accountId }}", "{{ poolId }}")'>Withdraw all</button>
+                      </td>
+                    </tr>
+                  {{/staking}}
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -412,7 +438,7 @@
 
         <!-- Copyright -->
         <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
-          © 2020 Copyright:
+          © 2021 Copyright:
           <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a>
         </div>
         <!-- Copyright -->

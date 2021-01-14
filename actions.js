@@ -33,7 +33,7 @@ function funcCall(methodName, args, deposit, gas) {
     return {
         "type": "FunctionCall",
         "method_name": methodName,
-        "args": btoa(JSON.stringify(args)),
+        "args": btoa(JSON.stringify(args ? args : {})),
         "deposit": deposit ? deposit : '0',
         "gas": gas ? gas : '100000000000000'
     };
