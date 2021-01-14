@@ -75,7 +75,7 @@ const setAccounts = (accountIds: string[]): void => {
 
 export const addAccount = async (accountId: string) => {
   const accountIds = getAccounts();
-  console.log(accountIds);
+
   if (!accountIds.includes(accountId)) {
     accountIds.push(accountId);
     setAccounts(accountIds);
