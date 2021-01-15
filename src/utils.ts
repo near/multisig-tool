@@ -46,17 +46,18 @@ const getAccounts = () => {
 export const loadAccounts = async () => {
   const accountIds = getAccounts();
 
-  return Promise.all(
+  const accounts = await Promise.all(
     accountIds.map(async (acc) => {
       let result;
       try {
         const account = await window.near.account(acc);
         const state = await account.state();
-
-        result = {
-          accountId: account.accountId,
-          amount: utils.format.formatNearAmount(state.amount, 2),
-        };
+        if (account) {
+          result = {
+            accountId: account?.accountId,
+            amount: utils.format.formatNearAmount(state?.amount, 2),
+          };
+        }
       } catch (error) {
         console.log(error);
       }
@@ -64,6 +65,8 @@ export const loadAccounts = async () => {
       return result;
     })
   );
+
+  return accounts.filter(Boolean);
 };
 
 const setAccounts = (accountIds: string[]): void => {
@@ -72,6 +75,7 @@ const setAccounts = (accountIds: string[]): void => {
 
 export const addAccount = async (accountId: string) => {
   const accountIds = getAccounts();
+
   if (!accountIds.includes(accountId)) {
     accountIds.push(accountId);
     setAccounts(accountIds);
