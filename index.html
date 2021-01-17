@@ -301,7 +301,6 @@
             <div class="col-12 col-lg-6 text-left justify-content-center">
                 <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'terminate_vesting')">Terminate</button>
                 <button type="button" class="btn btn-warning ml-3" onclick="submitRequest('{{ accountId }}', 'termination_withdraw')">Withdraw</button>
-
             </div>
           </div>
 
@@ -373,7 +372,7 @@
             </p>
 
             <div class="row mb-4">
-                <label class="form-label" for="select-pool-id">Select or Enter Pool Id</label>
+              <label>Select or Enter Pool Id</label>
               <div class="col-12 col-lg-6 text-left justify-content-center">
                 <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
                   <option></option>
@@ -381,9 +380,8 @@
                     <option value="{{ poolId }}">{{ poolId }} -- {{ fee }} -- {{ stake }}</option>
                   {{/pools}}
                 </select>
-                <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+                <input id="select-pool-id" style="width: 180px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
               </div>
-
             </div>
 
             <div class="row mb-4">
@@ -453,9 +451,13 @@
 </html>
 
 <script type="application/javascript">
-  document.addEventListener("DOMContentLoaded", () => {
+  function initInputs() {
     document.querySelectorAll('.form-outline').forEach((formOutline) => {
       new window.mdb.Input(formOutline).init();
     });
+  }
+  window.initInputs = initInputs;
+  document.addEventListener("DOMContentLoaded", () => {
+    initInputs();
   })
 </script>

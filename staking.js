@@ -1,6 +1,7 @@
 import * as nearAPI from 'near-api-js';
 import Mustache from 'mustache';
 
+import * as utils from './utils.js';
 import { funcCall, setAccountSigner } from './actions';
 
 async function fetchPools(masterAccount) {
@@ -29,7 +30,6 @@ async function fetchPools(masterAccount) {
 async function loadAccountStaking(accountId) {
     let masterAccount = await window.near.account(accountId);
     let pools = await fetchPools(masterAccount);
-    console.log(pools);
     const template = document.getElementById('template-staking').innerHTML;
     let staking = [];
     await Promise.all(pools.map(async ({ poolId }) => {
@@ -48,17 +48,19 @@ async function loadAccountStaking(accountId) {
         pools,
         staking
     });
+    window.initInputs();
 }
 
-async function poolRequest(accountId, poolId, action, args, deposit) {
-    console.log(`from ${accountId} to ${poolId}.${action}(${args}) with ${deposit}N`);
-    amount = utils.parseAmount(amount);
+async function poolRequest(accountId, poolId, action, args, amount) {
+    console.log(`from ${accountId} to ${poolId}.${action}(${JSON.stringify(args)}) with ${amount}N`);
+    amount = amount ? utils.parseAmount(amount) : null;
+    let masterAccount = await window.near.account(accountId);
     try {
         await setAccountSigner(masterAccount);
         await masterAccount.functionCall(accountId, "add_request", {
             request: {
                 receiver_id: poolId,
-                actions: [funcCall(action, args, deposit)],
+                actions: [funcCall(action, args, amount)],
             }
         });
     } catch (error) {
@@ -78,19 +80,19 @@ async function unstakeAll(accountId, poolId) {
 
 async function depositAndStake(accountId) {
     const poolId = document.querySelector('#select-pool-id').value;
-    const amount = document.querySelector('#transfer-amount').value;
+    const amount = document.querySelector('#stake-amount').value;
     await poolRequest(accountId, poolId, "deposit_and_stake", {}, amount);
 }
 
 async function unstake(accountId) {
     const poolId = document.querySelector('#select-pool-id').value;
-    const amount = document.querySelector('#transfer-amount').value;
+    const amount = document.querySelector('#stake-amount').value;
     await poolRequest(accountId, poolId, "unstake", { amount: utils.parseAmount(amount) });
 }
 
 async function stakeWithdraw(accountId) {
     const poolId = document.querySelector('#select-pool-id').value;
-    const amount = document.querySelector('#transfer-amount').value;
+    const amount = document.querySelector('#stake-amount').value;
     await poolRequest(accountId, poolId, "withdraw", { amount: utils.parseAmount(amount) });
 }
 

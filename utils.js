@@ -71,5 +71,5 @@ module.exports = {
     findPath,
     accountToLockup,
     lockupStatus,
-    LOCKUP_BASE
+    LOCKUP_BASE,
 }
