@@ -25436,6 +25436,8 @@ var nearAPI = _interopRequireWildcard(require("near-api-js"));
 
 var _mustache = _interopRequireDefault(require("mustache"));
 
+var utils = _interopRequireWildcard(require("./utils.js"));
+
 var _actions = require("./actions");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -25542,10 +25544,9 @@ function _loadAccountStaking() {
 
           case 5:
             pools = _context4.sent;
-            console.log(pools);
             template = document.getElementById('template-staking').innerHTML;
             staking = [];
-            _context4.next = 11;
+            _context4.next = 10;
             return Promise.all(pools.map( /*#__PURE__*/function () {
               var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(_ref2) {
                 var poolId, totalStaked, totalUnstaked;
@@ -25590,12 +25591,13 @@ function _loadAccountStaking() {
               };
             }()));
 
-          case 11:
+          case 10:
             document.getElementById('requests').innerHTML = _mustache.default.render(template, {
               accountId: accountId,
               pools: pools,
               staking: staking
             });
+            window.initInputs();
 
           case 12:
           case "end":
@@ -25612,45 +25614,51 @@ function poolRequest(_x3, _x4, _x5, _x6, _x7) {
 }
 
 function _poolRequest() {
-  _poolRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(accountId, poolId, action, args, deposit) {
+  _poolRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(accountId, poolId, action, args, amount) {
+    var masterAccount;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            console.log("from ".concat(accountId, " to ").concat(poolId, ".").concat(action, "(").concat(args, ") with ").concat(deposit, "N"));
-            amount = utils.parseAmount(amount);
-            _context5.prev = 2;
-            _context5.next = 5;
+            console.log("from ".concat(accountId, " to ").concat(poolId, ".").concat(action, "(").concat(JSON.stringify(args), ") with ").concat(amount, "N"));
+            amount = amount ? utils.parseAmount(amount) : null;
+            _context5.next = 4;
+            return window.near.account(accountId);
+
+          case 4:
+            masterAccount = _context5.sent;
+            _context5.prev = 5;
+            _context5.next = 8;
             return (0, _actions.setAccountSigner)(masterAccount);
 
-          case 5:
-            _context5.next = 7;
+          case 8:
+            _context5.next = 10;
             return masterAccount.functionCall(accountId, "add_request", {
               request: {
                 receiver_id: poolId,
-                actions: [(0, _actions.funcCall)(action, args, deposit)]
+                actions: [(0, _actions.funcCall)(action, args, amount)]
               }
             });
 
-          case 7:
-            _context5.next = 13;
+          case 10:
+            _context5.next = 16;
             break;
 
-          case 9:
-            _context5.prev = 9;
-            _context5.t0 = _context5["catch"](2);
+          case 12:
+            _context5.prev = 12;
+            _context5.t0 = _context5["catch"](5);
             console.error(_context5.t0);
             alert(_context5.t0);
 
-          case 13:
+          case 16:
             loadAccountStaking(accountId);
 
-          case 14:
+          case 17:
           case "end":
             return _context5.stop();
         }
       }
-    }, _callee5, null, [[2, 9]]);
+    }, _callee5, null, [[5, 12]]);
   }));
   return _poolRequest.apply(this, arguments);
 }
@@ -25713,7 +25721,7 @@ function _depositAndStake() {
         switch (_context8.prev = _context8.next) {
           case 0:
             poolId = document.querySelector('#select-pool-id').value;
-            amount = document.querySelector('#transfer-amount').value;
+            amount = document.querySelector('#stake-amount').value;
             _context8.next = 4;
             return poolRequest(accountId, poolId, "deposit_and_stake", {}, amount);
 
@@ -25739,7 +25747,7 @@ function _unstake() {
         switch (_context9.prev = _context9.next) {
           case 0:
             poolId = document.querySelector('#select-pool-id').value;
-            amount = document.querySelector('#transfer-amount').value;
+            amount = document.querySelector('#stake-amount').value;
             _context9.next = 4;
             return poolRequest(accountId, poolId, "unstake", {
               amount: utils.parseAmount(amount)
@@ -25767,7 +25775,7 @@ function _stakeWithdraw() {
         switch (_context10.prev = _context10.next) {
           case 0:
             poolId = document.querySelector('#select-pool-id').value;
-            amount = document.querySelector('#transfer-amount').value;
+            amount = document.querySelector('#stake-amount').value;
             _context10.next = 4;
             return poolRequest(accountId, poolId, "withdraw", {
               amount: utils.parseAmount(amount)
@@ -25791,7 +25799,7 @@ window.unstakeAll = unstakeAll;
 window.depositAndStake = depositAndStake;
 window.unstake = unstake;
 window.stakeWithdraw = stakeWithdraw;
-},{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","mustache":"node_modules/mustache/mustache.js","./actions":"actions.js"}],"script.js":[function(require,module,exports) {
+},{"near-api-js":"node_modules/near-api-js/lib/browser-index.js","mustache":"node_modules/mustache/mustache.js","./utils.js":"utils.js","./actions":"actions.js"}],"script.js":[function(require,module,exports) {
 var Buffer = require("buffer").Buffer;
 "use strict";
 
@@ -26479,7 +26487,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62022" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61524" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

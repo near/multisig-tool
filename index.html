@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.2ec7ad50.js" defer></script></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.e6bb1236.js" defer></script></head><body>
 <div class="container fluid"> <div class="row"> <div class="col-md-8 col-xs-12 mx-auto"> <div class="card"> <div class="card-body"> <h2 class="card-title text-center">Tool to manage multisigs</h2> <hr> <p class="mb-0 text-center"> This is temporary until NEAR Wallet adds this functionality </p> </div> </div> <br> <div class="card"> <div class="card-body"> <h5 class="card-title">Keys</h5> <p class="card-text"> <ul class="list-group list-group-flush"> <script id="template-keys" type="x-tmpl-mustache">
               {{#keys}}
                   <li class="list-group-item"> <input class="form-check-input mr-1" type="checkbox" value="" aria-label="{{ publicKey }}
@@ -168,7 +168,6 @@
             <div class="col-12 col-lg-6 text-left justify-content-center">
                 <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'terminate_vesting')">Terminate</button>
                 <button type="button" class="btn btn-warning ml-3" onclick="submitRequest('{{ accountId }}', 'termination_withdraw')">Withdraw</button>
-
             </div>
           </div>
 
@@ -186,7 +185,7 @@
             </p>
 
             <div class="row mb-4">
-                <label class="form-label" for="select-pool-id">Select or Enter Pool Id</label>
+              <label>Select or Enter Pool Id</label>
               <div class="col-12 col-lg-6 text-left justify-content-center">
                 <select style="width: 200px; float: left;" onchange="this.nextElementSibling.value=this.value">
                   <option></option>
@@ -194,9 +193,8 @@
                     <option value="{{ poolId }}">{{ poolId }} -- {{ fee }} -- {{ stake }}</option>
                   {{/pools}}
                 </select>
-                <input id="select-pool-id" style="width: 175px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
+                <input id="select-pool-id" style="width: 180px; margin-left: -199px; margin-top: 1px; border: none; float: left;"/>
               </div>
-
             </div>
 
             <div class="row mb-4">
@@ -244,4 +242,4 @@
           </div>
         </div>
       </script> <div id="requests"></div> <footer class="bg-light text-center text-lg-left">  <div class="text-center p-3" style="background-color:rgba(0,0,0,.2);"> © 2021 Copyright: <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a> </div>  </footer> </div> </div>
-</div> </body></html><script>document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".form-outline").forEach(function(n){new window.mdb.Input(n).init()})});</script>
+</div> </body></html><script>function n(){document.querySelectorAll(".form-outline").forEach(function(n){new window.mdb.Input(n).init()})}window.initInputs=n,document.addEventListener("DOMContentLoaded",function(){n()});</script>
