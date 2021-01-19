@@ -8,12 +8,18 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "@types/enzyme": "^3.10.8",
+    "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/enzyme-to-json": "^1.5.4",
     "@types/jest": "^26.0.15",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.15",
     "antd": "^4.10.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.5",
+    "enzyme-to-json": "^3.6.1",
     "near-api-js": "^0.36.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -35,6 +41,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:staged": "react-scripts test --watchAll=false --passWithNoTests",
     "eject": "react-scripts eject",
     "lint:eslint": "eslint --ignore-path .eslintignore src",
     "lint:eslint:fix": "eslint --ignore-path .eslintignore src --fix",
@@ -60,7 +67,8 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "yarn prettier:write"
+      "yarn prettier:write",
+      "yarn test:staged"
     ]
   }
 }
