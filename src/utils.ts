@@ -3,13 +3,15 @@ import {
   Contract,
   keyStores,
   WalletConnection,
+  Account,
   utils,
 } from "near-api-js";
+import BN from "bn.js";
 import getConfig from "./config";
 
 const nearConfig = getConfig(process.env.NODE_ENV || "development");
 
-export const init = async () => {
+export const init = async (): Promise<void> => {
   const connectionBody = {
     ...{ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } },
     ...nearConfig,
@@ -73,7 +75,7 @@ const setAccounts = (accountIds: string[]): void => {
   window.localStorage.setItem("accounts", accountIds.join(","));
 };
 
-export const addAccount = async (accountId: string) => {
+export const addAccount = async (accountId: string): Promise<void> => {
   const accountIds = getAccounts();
 
   if (!accountIds.includes(accountId)) {
@@ -88,6 +90,21 @@ export const isUserLoggedIn = (): boolean => {
   const auth = JSON.parse(localStorage.getItem("null_wallet_auth_key") || "{}");
 
   return Boolean(auth?.accountId);
+};
+
+export const createAccount = async (
+  name: string,
+  publicKey: string
+): Promise<void> => {
+  try {
+    const account = new Account(window.near.connection, window.accountId);
+    const num = new BN("1");
+    console.log(window.near, window);
+    const a = await account.createAccount(name, publicKey, num);
+    console.log(a);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 // TODO Decide should we use class
