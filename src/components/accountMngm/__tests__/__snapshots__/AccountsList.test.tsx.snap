@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<AccountsList/> render properly 1`] = `
+<div
+  class="ant-list ant-list-split ant-list-bordered"
+>
+  <div
+    class="ant-list-header"
+  >
+    <h3>
+      Accounts list
+    </h3>
+  </div>
+  <div
+    class="ant-spin-nested-loading"
+  >
+    <div
+      class="ant-spin-container"
+    >
+      <ul
+        class="ant-list-items"
+      >
+        <li
+          class="ant-list-item"
+        >
+          <span
+            data-test="account-item"
+          >
+            test: 123
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;

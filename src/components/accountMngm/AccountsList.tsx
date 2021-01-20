@@ -13,7 +13,7 @@ const AccountsList: FC<Props> = ({ data }): ReactElement => {
       dataSource={data}
       renderItem={(item) => (
         <List.Item>
-          <div>{`${item?.accountId}: ${item?.amount}`}</div>
+          <span data-test="account-item">{`${item?.accountId}: ${item?.amount}`}</span>
         </List.Item>
       )}
     />
