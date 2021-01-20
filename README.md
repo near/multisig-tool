@@ -1,15 +1,20 @@
 # Getting Started 
+In the project directory
 
-In the project directory, you can run:
+Before start 
+###`yarn install`
+To start project, you can run:
 ### `yarn start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-### `yarn test`
+### `yarn test:watch`
+Launches the test runner in the interactive watch mode.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `yarn test:coverage`
+Run tests coverage, then you can see coverage of test in
+`coverage/lcov-report/index.html`
 
 ### `yarn build`
 
