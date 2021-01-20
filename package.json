@@ -40,7 +40,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test:watch": "react-scripts test --watchAll --silent",
+    "test:changed": "react-scripts test --silent -o",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
     "test:staged": "react-scripts test --watchAll=false --passWithNoTests",
     "eject": "react-scripts eject",
     "lint:eslint": "eslint --ignore-path .eslintignore src",
