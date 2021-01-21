@@ -38,56 +38,22 @@ export const login = async () => {
   await window.walletConnection.requestSignIn(nearConfig.contractName);
 };
 
-const getAccounts = () => {
-  const accountIds = localStorage.getItem("accounts");
-  return accountIds ? accountIds.split(",") : [];
-};
-
-export const loadAccounts = async () => {
-  const accountIds = getAccounts();
-
-  const accounts = await Promise.all(
-    accountIds.map(async (acc) => {
-      let result;
-      try {
-        const account = await window.near.account(acc);
-        const state = await account.state();
-        if (account) {
-          result = {
-            accountId: account?.accountId,
-            amount: utils.format.formatNearAmount(state?.amount, 2),
-          };
-        }
-      } catch (error) {
-        console.log(error);
-      }
-
-      return result;
-    })
-  );
-
-  return accounts.filter(Boolean);
-};
-
-const setAccounts = (accountIds: string[]): void => {
-  window.localStorage.setItem("accounts", accountIds.join(","));
-};
-
-export const addAccount = async (accountId: string) => {
-  const accountIds = getAccounts();
-
-  if (!accountIds.includes(accountId)) {
-    accountIds.push(accountId);
-    setAccounts(accountIds);
+export const loadAccount = async (accountId: string) => {
+  let result: Account | undefined;
+  try {
+    const account = await window.near.account(accountId);
+    const state = await account.state();
+    if (account) {
+      result = {
+        id: account?.accountId as string,
+        amount: utils.format.formatNearAmount(state?.amount, 2),
+      } as Account;
+    }
+  } catch (error) {
+    console.log(error);
   }
-  await loadAccounts();
-  window.hash = accountId;
-};
 
-export const isUserLoggedIn = (): boolean => {
-  const auth = JSON.parse(localStorage.getItem("null_wallet_auth_key") || "{}");
-
-  return Boolean(auth?.accountId);
+  return result;
 };
 
 // TODO Decide should we use class
