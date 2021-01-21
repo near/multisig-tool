@@ -10,8 +10,8 @@ export const checkAuthentication = createAction("auth/check");
 
 const initialState: {
   isLoading: boolean;
-  isSignedIn: boolean;
-  accountId?: string;
+  isSignedIn: boolean; // sign-in status
+  accountId?: string; // signed account id
 } = {
   isLoading: false,
   isSignedIn: false,
@@ -42,6 +42,7 @@ export default createSlice({
       state.isSignedIn = false;
       state.accountId = undefined;
     });
+    // check current sign-in status for auto-login
     builder.addCase(checkAuthentication, (state) => {
       state.isSignedIn = false;
       state.accountId = undefined;

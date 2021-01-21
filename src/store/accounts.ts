@@ -11,6 +11,7 @@ export const accountsAdapter = createEntityAdapter<Account>({
   sortComparer: (a, b) => parseInt(a.amount, 10) - parseInt(b.amount, 10),
 });
 
+// load amount of accounts in redux store
 export const loadAccounts = createAsyncThunk(
   "accounts/fetch",
   async (_, { getState }) => {
@@ -23,6 +24,7 @@ export const loadAccounts = createAsyncThunk(
   }
 );
 
+// add a new account to redux store
 export const addAccount = createAsyncThunk(
   "accounts/add",
   async (accountId: string) => {
@@ -46,6 +48,7 @@ export default createSlice({
       }
     });
     builder.addCase(signOut, (state) => {
+      // remove accounts when sign out
       accountsAdapter.removeAll(state);
     });
   },

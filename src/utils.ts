@@ -1,14 +1,9 @@
-import {
-  connect,
-  Contract,
-  keyStores,
-  WalletConnection,
-  utils,
-} from "near-api-js";
+import { connect, keyStores, WalletConnection, utils } from "near-api-js";
 import getConfig from "./config";
 
 const nearConfig = getConfig(process.env.NODE_ENV || "development");
 
+// near wallet connection
 export const init = async () => {
   const connectionBody = {
     ...{ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } },
@@ -18,26 +13,20 @@ export const init = async () => {
 
   window.near = near;
   window.walletConnection = new WalletConnection(near, null);
-  window.accountId = window.walletConnection.getAccountId();
-  window.contract = new Contract(
-    window.walletConnection.account(),
-    nearConfig.contractName,
-    {
-      viewMethods: ["getGreeting"],
-      changeMethods: ["setGreeting"],
-    }
-  );
 };
 
+// near wallet sign out
 export const logout = () => {
   window.walletConnection.signOut();
   window.location.replace(window.location.origin + window.location.pathname);
 };
 
+// near wallet sign in
 export const login = async () => {
   await window.walletConnection.requestSignIn(nearConfig.contractName);
 };
 
+// load account amount from account id
 export const loadAccount = async (accountId: string) => {
   let result: Account | undefined;
   try {
