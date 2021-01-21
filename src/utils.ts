@@ -1,14 +1,9 @@
-import {
-  connect,
-  Contract,
-  keyStores,
-  WalletConnection,
-  utils,
-} from "near-api-js";
+import { connect, keyStores, WalletConnection, utils } from "near-api-js";
 import getConfig from "./config";
 
 const nearConfig = getConfig(process.env.NODE_ENV || "development");
 
+// near wallet connection
 export const init = async () => {
   const connectionBody = {
     ...{ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } },
@@ -18,76 +13,36 @@ export const init = async () => {
 
   window.near = near;
   window.walletConnection = new WalletConnection(near, null);
-  window.accountId = window.walletConnection.getAccountId();
-  window.contract = new Contract(
-    window.walletConnection.account(),
-    nearConfig.contractName,
-    {
-      viewMethods: ["getGreeting"],
-      changeMethods: ["setGreeting"],
-    }
-  );
 };
 
+// near wallet sign out
 export const logout = () => {
   window.walletConnection.signOut();
   window.location.replace(window.location.origin + window.location.pathname);
 };
 
-export const login = () => {
-  window.walletConnection.requestSignIn(nearConfig.contractName);
+// near wallet sign in
+export const login = async () => {
+  await window.walletConnection.requestSignIn(nearConfig.contractName);
 };
 
-const getAccounts = () => {
-  const accountIds = localStorage.getItem("accounts");
-  return accountIds ? accountIds.split(",") : [];
-};
-
-export const loadAccounts = async () => {
-  const accountIds = getAccounts();
-
-  const accounts = await Promise.all(
-    accountIds.map(async (acc) => {
-      let result;
-      try {
-        const account = await window.near.account(acc);
-        const state = await account.state();
-        if (account) {
-          result = {
-            accountId: account?.accountId,
-            amount: utils.format.formatNearAmount(state?.amount, 2),
-          };
-        }
-      } catch (error) {
-        console.log(error);
-      }
-
-      return result;
-    })
-  );
-
-  return accounts.filter(Boolean);
-};
-
-const setAccounts = (accountIds: string[]): void => {
-  window.localStorage.setItem("accounts", accountIds.join(","));
-};
-
-export const addAccount = async (accountId: string) => {
-  const accountIds = getAccounts();
-
-  if (!accountIds.includes(accountId)) {
-    accountIds.push(accountId);
-    setAccounts(accountIds);
+// load account amount from account id
+export const loadAccount = async (accountId: string) => {
+  let result: Account | undefined;
+  try {
+    const account = await window.near.account(accountId);
+    const state = await account.state();
+    if (account) {
+      result = {
+        id: account?.accountId as string,
+        amount: utils.format.formatNearAmount(state?.amount, 2),
+      } as Account;
+    }
+  } catch (error) {
+    console.log(error);
   }
-  await loadAccounts();
-  window.hash = accountId;
-};
 
-export const isUserLoggedIn = (): boolean => {
-  const auth = JSON.parse(localStorage.getItem("null_wallet_auth_key") || "{}");
-
-  return Boolean(auth?.accountId);
+  return result;
 };
 
 // TODO Decide should we use class

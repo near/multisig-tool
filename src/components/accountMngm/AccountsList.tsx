@@ -2,7 +2,7 @@ import React, { FC, ReactElement } from "react";
 import { List } from "antd";
 
 interface Props {
-  data: ({ accountId: string; amount: string } | undefined)[];
+  data: Account[];
 }
 
 const AccountsList: FC<Props> = ({ data }): ReactElement => {
@@ -13,7 +13,7 @@ const AccountsList: FC<Props> = ({ data }): ReactElement => {
       dataSource={data}
       renderItem={(item) => (
         <List.Item>
-          <span data-test="account-item">{`${item?.accountId}: ${item?.amount}`}</span>
+          <span data-test="account-item">{`${item.id}: ${item.amount}`}</span>
         </List.Item>
       )}
     />

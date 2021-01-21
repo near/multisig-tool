@@ -1,34 +1,23 @@
-import React, { FC, ReactElement, useEffect, useState } from "react";
-import { addAccount, loadAccounts } from "../../utils";
+import React, { FC, ReactElement, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addAccount, loadAccounts } from "../../store/accounts";
+import { getAccountsList } from "../../store/selectors/accounts";
 import AccountsList from "./AccountsList";
 import AddAccount from "./AddAccount";
 
 const AccountMngm: FC = (): ReactElement => {
-  const [data, setData] = useState<
-    ({ accountId: string; amount: string } | undefined)[]
-  >([]);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    loadAccounts().then((accounts) => {
-      if (accounts) {
-        setData(accounts);
-      }
-    });
-  }, []);
+    dispatch(loadAccounts);
+  }, [dispatch]);
 
-  const handleAddAccount = async (value: string) => {
-    await addAccount(value);
-    const accounts = await loadAccounts();
-
-    if (accounts) {
-      setData(accounts);
-    }
-  };
+  const accounts = useSelector(getAccountsList);
 
   return (
     <>
-      <AddAccount addAccount={handleAddAccount} />
-      <AccountsList data={data} />
+      <AddAccount addAccount={(value: string) => dispatch(addAccount(value))} />
+      <AccountsList data={accounts} />
     </>
   );
 };

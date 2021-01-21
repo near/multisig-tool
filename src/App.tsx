@@ -1,14 +1,24 @@
-import React, { FC, ReactElement } from "react";
+import React, { FC, ReactElement, useEffect } from "react";
 import { Layout } from "antd";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "./components/header";
+import { checkAuthentication } from "./store/auth";
+import { getIsSignedIn } from "./store/selectors/auth";
 import AccountMngm from "./components/accountMngm";
-import { isUserLoggedIn } from "./utils";
 
 const App: FC = (): ReactElement => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkAuthentication());
+  }, [dispatch]);
+
+  const isSignedIn = useSelector(getIsSignedIn);
+
   return (
     <Layout>
       <Header />
-      {isUserLoggedIn() && <AccountMngm />}
+      {isSignedIn && <AccountMngm />}
     </Layout>
   );
 };

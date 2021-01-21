@@ -5,7 +5,7 @@ import AccountsList from "../AccountsList";
 
 const mock = [
   {
-    accountId: "test",
+    id: "test",
     amount: "123",
   },
 ];
@@ -18,7 +18,7 @@ describe("<AccountsList/>", () => {
   it("render props properly", () => {
     const wrapper: any = render(<AccountsList data={mock} />);
     const accountInfo = findByAttr(wrapper, "account-item");
-    const shouldEqual = `${mock[0].accountId}: ${mock[0].amount}`;
+    const shouldEqual = `${mock[0].id}: ${mock[0].amount}`;
 
     expect(accountInfo.text()).toEqual(shouldEqual);
   });
