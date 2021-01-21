@@ -1,23 +1,26 @@
 import React, { FC, ReactElement } from "react";
 import { Layout, Button } from "antd";
-import { login, logout, isUserLoggedIn } from "../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import { signIn, signOut } from "../../store/auth";
+import { getAccountId, getIsSignedIn } from "../../store/selectors/auth";
 
 const { Header } = Layout;
 
 const HeaderComponent: FC = (): ReactElement => {
-  const auth = JSON.parse(localStorage.getItem("null_wallet_auth_key") || "{}");
-  const isLoggedIn = isUserLoggedIn();
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector(getIsSignedIn);
+  const accountId = useSelector(getAccountId);
 
   return (
     <Header>
-      {!isLoggedIn && (
-        <Button type="primary" onClick={login}>
+      {(!isLoggedIn || !accountId) && (
+        <Button type="primary" onClick={() => dispatch(signIn())}>
           Log in with NEAR wallet
         </Button>
       )}
-      {isLoggedIn && (
-        <Button type="primary" onClick={logout}>
-          {`Log out (${auth?.accountId})`}
+      {isLoggedIn && accountId && (
+        <Button type="primary" onClick={() => dispatch(signOut())}>
+          {`Log out (${accountId})`}
         </Button>
       )}
     </Header>

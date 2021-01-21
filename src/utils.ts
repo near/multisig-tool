@@ -34,8 +34,8 @@ export const logout = () => {
   window.location.replace(window.location.origin + window.location.pathname);
 };
 
-export const login = () => {
-  window.walletConnection.requestSignIn(nearConfig.contractName);
+export const login = async () => {
+  await window.walletConnection.requestSignIn(nearConfig.contractName);
 };
 
 const getAccounts = () => {
