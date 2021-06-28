@@ -20,7 +20,7 @@ async function accountExists(connection, accountId) {
 
 function parseAmount(amount) {
     try {
-        return nearAPI.utils.format.parseNearAmount(amount.replaceAll(",", ""));
+        return nearAPI.utils.format.parseNearAmount(amount.replace(/,/g, ''));
     } catch (error) {
         alert(`Failed to parse amount ${amount}`);
         throw error;
