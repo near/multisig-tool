@@ -52,13 +52,11 @@
           <h5 class="card-title">Keys</h5>
           <p class="card-text">
           <ul class="list-group list-group-flush">
-            <script id="template-keys" type="x-tmpl-mustache">
+            <script id="template-keys" type="x-tmpl-mustache" style="flex-wrap: wrap;">
               {{#keys}}
                   <li class="list-group-item"> <input class="form-check-input mr-1" type="checkbox" value="" aria-label="{{ publicKey }}
               " /> {{ publicKey }} {{ path }}</li>
               {{/keys}}
-
-
             </script>
           </ul>
           </p>
@@ -143,8 +141,9 @@
 
       <br>
 
-      <script id="template2" type="x-tmpl-mustache">
+      <script id="template2" type="x-tmpl-mustache" style="word-wrap: break-word;">
       <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}/staking'">Staking</button>
+      <hr/>
       <div class="card">
         <div class="card-body">
         <h5 class="card-title">Account: {{ accountId }}</h5>
@@ -160,9 +159,9 @@
           {{/lockupBalance}}
           <p>Num confirmations: {{ numConfirmations }}</p>
           <p>Keys</p>
-          <table class="table">
+          <table class="table" style="table-layout: fixed; width: 100%">
           {{#accessKeys}}
-            <tr><td>{{ public_key }}</td><td>{{ access_key.permission.FunctionCall.method_names }}</td></tr>
+            <tr><td>{{ public_key }}</td><td style="word-wrap: break-word">{{ access_key.permission.FunctionCall.method_names }}</td></tr>
           {{/accessKeys}}
           </table>
         <br />
@@ -299,8 +298,35 @@
               </div>
             </div>
             <div class="col-12 col-lg-6 text-left justify-content-center">
-                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'terminate_vesting')">Terminate</button>
+                <button type="button" class="btn btn-success" onclick="submitRequest('{{ accountId }}', 'terminate_vesting')">Terminate Public</button>
                 <button type="button" class="btn btn-warning ml-3" onclick="submitRequest('{{ accountId }}', 'termination_withdraw')">Withdraw</button>
+            </div>
+            <div class="col-12 col-lg-2 d-flex">
+              <div class="form-outline mb-3 w-100">
+                <input class="form-control" type="text" id="lockup-vesting-start-date" placeholder="YYYY-MM-DD" />
+                <label class="form-label" for="lockup-vesting-start-date">Start Date</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-2 d-flex">
+              <div class="form-outline mb-3 w-100">
+                <input class="form-control" type="text" id="lockup-vesting-cliff-date" placeholder="YYYY-MM-DD" />
+                <label class="form-label" for="lockup-vesting-cliff-date">Cliff Date</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-2 d-flex">
+              <div class="form-outline mb-3 w-100">
+                <input class="form-control" type="text" id="lockup-vesting-end-date" placeholder="YYYY-MM-DD" />
+                <label class="form-label" for="lockup-vesting-end-date">End Date</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-3 d-flex">
+              <div class="form-outline mb-3 w-100">
+                <input class="form-control" type="text" id="lockup-vesting-salt" placeholder="" />
+                <label class="form-label" for="lockup-vesting-salt">Vesting Salt</label>
+              </div>
+            </div>
+            <div class="col-12 col-lg-3 text-left justify-content-center">
+                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'terminate_private_vesting')">Terminate Private</button>
             </div>
           </div>
 
@@ -313,7 +339,7 @@
 
                 <!--
                           <p>Create new multisig account:</p>
-                
+
                           <div class="row mb-4 justify-content-left">
                             <div class="col-12 col-lg-6 d-flex">
                               <div class="form-outline mb-4 w-100">
@@ -325,12 +351,12 @@
                                 <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
                             </div>
                           </div>
-                
+
                           <hr />
                           <br />
-                
+
                           <p>Deploy lockup:</p>
-                
+
                           <div class="row mb-4 justify-content-left">
                             <div class="col-12 col-lg-6 d-flex">
                               <div class="form-outline mb-4 w-100">
@@ -360,11 +386,12 @@
                                 <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
                             </div>
                           </div>
-                
+
                           -->
 
       <script id="template-staking" type="x-tmpl-mustache">
       <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}'">Back</button>
+        <hr/>
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Account: {{ accountId }}</h5>
@@ -398,7 +425,7 @@
                   <button type="button" class="btn btn-primary" onclick="stakeWithdraw('{{ accountId }}')">Withdraw</button>
                 </div>
               </div>
-              
+
             </div>
 
             <hr />

@@ -5,6 +5,17 @@ import { encode, decode } from 'bs58';
 
 const LOCKUP_BASE = 'lockup.near';
 
+export const dateToNs = (dateObj) => {
+  if (!(dateObj instanceof Date) && typeof dateObj !== 'number') {
+    throw new Error(`Must be Date or number, got ${typeof dateObj}: ${dateObj}`);
+  }
+  if (dateObj instanceof Date) {
+    dateObj = dateObj.getTime();
+  }
+  // Time from getTime is in millis, we need nanos - multiple by 1M.
+  return (dateObj * 1000000).toString();
+}
+
 async function accountExists(connection, accountId) {
     try {
         const account = new nearAPI.Account(connection, accountId);
@@ -24,7 +35,7 @@ function parseAmount(amount) {
     } catch (error) {
         alert(`Failed to parse amount ${amount}`);
         throw error;
-    }    
+    }
 }
 
 
