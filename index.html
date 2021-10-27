@@ -57,6 +57,8 @@
                   <li class="list-group-item"> <input class="form-check-input mr-1" type="checkbox" value="" aria-label="{{ publicKey }}
               " /> {{ publicKey }} {{ path }}</li>
               {{/keys}}
+
+
             </script>
           </ul>
           </p>
@@ -118,6 +120,8 @@
               {{#accounts}}
                   <li class="list-group-item {{ active }}"> <a href="#{{ accountId }}">{{ accountId }}</a> {{ amount }}</li>
               {{/accounts}}
+
+
             </script>
           </ul>
           </p>
@@ -207,7 +211,7 @@
             <div class="col">
               <div>
                 <button type="button" class="btn btn-primary" onclick="submitRequest('{{ accountId }}', 'add_key')">Add request & confirm</button>
-                <button type="button" class="btn btn-warning" onclick="submitRequest('{{ accountId }}', 'add_request_key')">Add request only</button>
+                <button type="button" class="btn btn-warning mt-1" onclick="submitRequest('{{ accountId }}', 'add_request_key')">Add request only</button>
               </div>
             </div>
           </div>
@@ -288,106 +292,112 @@
           <hr />
           <br />
 
-          <p>Vesting termination:</p>
+          <p>Public vesting termination:</p>
 
           <div class="row mb-4 justify-content-left">
-            <div class="col-12 col-lg-6 d-flex">
+            <div class="col-12 col-lg-12 d-flex">
               <div class="form-outline mb-4 w-100">
                 <input class="form-control" type="text" id="lockup-account-id" placeholder="Lockup account" />
                 <label class="form-label" for="lockup-account-id">Enter lockup account</label>
               </div>
             </div>
-            <div class="col-12 col-lg-6 text-left justify-content-center">
-                <button type="button" class="btn btn-success" onclick="submitRequest('{{ accountId }}', 'terminate_vesting')">Terminate Public</button>
+            <div class="col-12 col-lg-12 text-left justify-content-center mb-2">
+              <div>
+                <button type="button" class="btn btn-success" onclick="submitRequest('{{ accountId }}', 'terminate_vesting')">Terminate Public Vesting</button>
                 <button type="button" class="btn btn-warning ml-3" onclick="submitRequest('{{ accountId }}', 'termination_withdraw')">Withdraw</button>
+               </div>
             </div>
-            <div class="col-12 col-lg-2 d-flex">
-              <div class="form-outline mb-3 w-100">
-                <input class="form-control" type="text" id="lockup-vesting-start-date" placeholder="YYYY-MM-DD" />
-                <label class="form-label" for="lockup-vesting-start-date">Start Date</label>
-              </div>
+            <p>Private vesting termination:</p>
+            <div class="row mb-4 justify-content-left">
+                 <div class="col-12 col-lg-3 d-flex">
+                  <div class="form-outline mb-3 w-100">
+                    <input class="form-control" type="text" id="lockup-vesting-start-date" placeholder="YYYY-MM-DD" />
+                    <label class="form-label" for="lockup-vesting-start-date">Start Date</label>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-3 d-flex">
+                  <div class="form-outline mb-3 w-100">
+                    <input class="form-control" type="text" id="lockup-vesting-cliff-date" placeholder="YYYY-MM-DD" />
+                    <label class="form-label" for="lockup-vesting-cliff-date">Cliff Date</label>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-3 d-flex">
+                  <div class="form-outline mb-3 w-100">
+                    <input class="form-control" type="text" id="lockup-vesting-end-date" placeholder="YYYY-MM-DD" />
+                    <label class="form-label" for="lockup-vesting-end-date">End Date</label>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-12 d-flex">
+                  <div class="form-outline mb-3 w-100">
+                    <input class="form-control" type="text" id="lockup-vesting-salt" placeholder="" />
+                    <label class="form-label" for="lockup-vesting-salt">Vesting Salt</label>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-4 text-left justify-content-center">
+                  <div>
+                    <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'terminate_private_vesting')">Terminate Private Vesting</button>
+                  </div>
+                </div>
             </div>
-            <div class="col-12 col-lg-2 d-flex">
-              <div class="form-outline mb-3 w-100">
-                <input class="form-control" type="text" id="lockup-vesting-cliff-date" placeholder="YYYY-MM-DD" />
-                <label class="form-label" for="lockup-vesting-cliff-date">Cliff Date</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-2 d-flex">
-              <div class="form-outline mb-3 w-100">
-                <input class="form-control" type="text" id="lockup-vesting-end-date" placeholder="YYYY-MM-DD" />
-                <label class="form-label" for="lockup-vesting-end-date">End Date</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-3 d-flex">
-              <div class="form-outline mb-3 w-100">
-                <input class="form-control" type="text" id="lockup-vesting-salt" placeholder="" />
-                <label class="form-label" for="lockup-vesting-salt">Vesting Salt</label>
-              </div>
-            </div>
-            <div class="col-12 col-lg-3 text-left justify-content-center">
-                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'terminate_private_vesting')">Terminate Private</button>
-            </div>
-          </div>
-
-          <hr />
           <br />
 
         </div>
       </div>
+
+
       </script>
 
-                <!--
-                          <p>Create new multisig account:</p>
+      <!--
+                <p>Create new multisig account:</p>
 
-                          <div class="row mb-4 justify-content-left">
-                            <div class="col-12 col-lg-6 d-flex">
-                              <div class="form-outline mb-4 w-100">
-                                <input class="form-control" type="text" id="multisig-account-id" placeholder="Account Id" />
-                                <label class="form-label" for="multisig-account-id">Account Id</label>
-                              </div>
-                            </div>
-                            <div class="col-12 col-lg-6 text-left justify-content-center">
-                                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
-                            </div>
-                          </div>
+                <div class="row mb-4 justify-content-left">
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="multisig-account-id" placeholder="Account Id" />
+                      <label class="form-label" for="multisig-account-id">Account Id</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 text-left justify-content-center">
+                      <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
+                  </div>
+                </div>
 
-                          <hr />
-                          <br />
+                <hr />
+                <br />
 
-                          <p>Deploy lockup:</p>
+                <p>Deploy lockup:</p>
 
-                          <div class="row mb-4 justify-content-left">
-                            <div class="col-12 col-lg-6 d-flex">
-                              <div class="form-outline mb-4 w-100">
-                                <input class="form-control" type="text" id="create-lockup-account-id" placeholder="Owner account for lockup contract" />
-                                <label class="form-label" for="create-lockup-account-id">Owner account for lockup contract</label>
-                              </div>
-                            </div>
-                            <div class="col-12 col-lg-6 d-flex">
-                              <div class="form-outline mb-4 w-100">
-                                <input class="form-control" type="text" id="create-lockup-amount" placeholder="Lockup amount in NEAR" />
-                                <label class="form-label" for="create-lockup-amount">Lockup amount in NEAR</label>
-                              </div>
-                            </div>
-                            <div class="col-12 col-lg-6 d-flex">
-                              <div class="form-outline mb-4 w-100">
-                                <input class="form-control" type="text" id="create-lockup-duration" placeholder="Lockup duration (in days)" />
-                                <label class="form-label" for="create-lockup-duration">Lockup duration (in days)</label>
-                              </div>
-                            </div>
-                            <div class="col-12 col-lg-6 d-flex">
-                              <div class="form-outline mb-4 w-100">
-                                <input type="checkbox" id="create-lockup-staking" placeholder="" checked />
-                                <label for="create-lockup-staking">Enable staking</label>
-                              </div>
-                            </div>
-                            <div class="col-12 col-lg-6 text-left justify-content-center">
-                                <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
-                            </div>
-                          </div>
+                <div class="row mb-4 justify-content-left">
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="create-lockup-account-id" placeholder="Owner account for lockup contract" />
+                      <label class="form-label" for="create-lockup-account-id">Owner account for lockup contract</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="create-lockup-amount" placeholder="Lockup amount in NEAR" />
+                      <label class="form-label" for="create-lockup-amount">Lockup amount in NEAR</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="create-lockup-duration" placeholder="Lockup duration (in days)" />
+                      <label class="form-label" for="create-lockup-duration">Lockup duration (in days)</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input type="checkbox" id="create-lockup-staking" placeholder="" checked />
+                      <label for="create-lockup-staking">Enable staking</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 text-left justify-content-center">
+                      <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
+                  </div>
+                </div>
 
-                          -->
+                -->
 
       <script id="template-staking" type="x-tmpl-mustache">
       <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}'">Back</button>
@@ -455,6 +465,8 @@
             </div>
           </div>
         </div>
+
+
       </script>
 
       <div id="requests"></div>
@@ -483,6 +495,7 @@
       new window.mdb.Input(formOutline).init();
     });
   }
+
   window.initInputs = initInputs;
   document.addEventListener("DOMContentLoaded", () => {
     initInputs();
