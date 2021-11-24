@@ -1,4 +1,6 @@
 import { createClient } from 'near-ledger-js';
+//import TransportU2F from "@ledgerhq/hw-transport-webhid";
+/* deprecated, redo with new library, untested */
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 
 async function createLedgerU2FTransport() {
