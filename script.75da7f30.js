@@ -25891,7 +25891,8 @@ function _vestingTermination() {
 
 function dateToEpoch(date) {
   return Math.floor(date.getTime() / 1000.0 * 1000000);
-}
+} // Copy-paste from near-claims
+
 
 function dateToNs(dateObj) {
   if (!(dateObj instanceof Date) && typeof dateObj !== 'number') {
@@ -25977,20 +25978,17 @@ function _vestingPrivateTermination() {
               lockupOwnerMoniker = lockupOwnerAccountId;
             }
 
-            console.log("owner", lockupOwnerAccountId, lockupOwnerMoniker);
             salt = Buffer.from((0, _jsSha.default)(Buffer.from(lockupVestingSalt + lockupOwnerMoniker)), 'hex').toString('base64');
-            console.log("salt", salt);
-            _context9.next = 25;
+            _context9.next = 23;
             return lockupContract.get_vesting_information();
 
-          case 25:
+          case 23:
             vestingInformation = _context9.sent;
-            console.log("vesting information", vestingInformation);
             timezone = -12;
 
-          case 28:
+          case 25:
             if (!(timezone <= 12)) {
-              _context9.next = 42;
+              _context9.next = 38;
               break;
             }
 
@@ -26000,10 +25998,9 @@ function _vestingPrivateTermination() {
             lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
             lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
             lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
-            console.log("timezone", timezone, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy);
 
             if (!(vestingInformation.VestingHash === computeVestingHash(lockupVestingSalt, lockupOwnerMoniker, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy))) {
-              _context9.next = 39;
+              _context9.next = 35;
               break;
             }
 
@@ -26017,27 +26014,25 @@ function _vestingPrivateTermination() {
                 salt: salt
               }
             };
-            return _context9.abrupt("break", 42);
+            return _context9.abrupt("break", 38);
 
-          case 39:
+          case 35:
             timezone += 1;
-            _context9.next = 28;
+            _context9.next = 25;
             break;
 
-          case 42:
-            console.log(args);
-
+          case 38:
             if (args) {
-              _context9.next = 46;
+              _context9.next = 41;
               break;
             }
 
             alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
             return _context9.abrupt("return");
 
-          case 46:
-            _context9.prev = 46;
-            _context9.next = 49;
+          case 41:
+            _context9.prev = 41;
+            _context9.next = 44;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -26045,21 +26040,21 @@ function _vestingPrivateTermination() {
               }
             });
 
-          case 49:
-            _context9.next = 54;
+          case 44:
+            _context9.next = 49;
             break;
 
-          case 51:
-            _context9.prev = 51;
-            _context9.t0 = _context9["catch"](46);
+          case 46:
+            _context9.prev = 46;
+            _context9.t0 = _context9["catch"](41);
             console.log(_context9.t0);
 
-          case 54:
+          case 49:
           case "end":
             return _context9.stop();
         }
       }
-    }, _callee9, null, [[46, 51]]);
+    }, _callee9, null, [[41, 46]]);
   }));
   return _vestingPrivateTermination.apply(this, arguments);
 }
@@ -27333,7 +27328,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40609" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42177" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
