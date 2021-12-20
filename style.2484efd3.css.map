@@ -1,1 +1,0 @@
-{"version":3,"sources":["style.css"],"names":[],"mappings":"AAEA,KACE,sCAAyC,CACzC,UACF,CAEA,GACE,iBAAkB,CAClB,aACF","file":"style.2484efd3.css","sourceRoot":"..","sourcesContent":["/* CSS files add styling rules to your content */\n\nbody {\n  font-family: helvetica, arial, sans-serif;\n  margin: 2em;\n}\n\nh1 {\n  font-style: italic;\n  color: #373fff;\n}\n\n"]}
