@@ -1,4 +1,5 @@
 import * as nearAPI from 'near-api-js';
+import { parseSeedPhrase } from 'near-seed-phrase';
 
 import * as utils from './utils.js';
 import {deployLockup} from './lockup.js';
@@ -7,10 +8,43 @@ import sha256 from "js-sha256";
 
 async function setAccountSigner(contract) {
   const accessKeys = await contract.getAccessKeys();
-  console.log(accessKeys);
-  let {publicKey, path} = await utils.findPath(accessKeys.map(({public_key}) => public_key));
+
+  const seedPhrase = document.querySelector('#seed-phrase').value;
+  const seedPath = document.querySelector('#seed-path').value;
+  const privateKey = document.querySelector('#private-key').value;
+
+  let keyPair;
+  if (privateKey !== '') {
+    const _keyPair = nearAPI.utils.KeyPair.fromString(privateKey);
+    const publicKeyString = _keyPair.publicKey.toString();
+    if (accessKeys.some(({ public_key }) => public_key === publicKeyString)) {
+      console.log("Using private key")
+      keyPair = _keyPair;
+    } else {
+      console.log("The public key of the specified private key does not match any of the keys on the contract")
+    }
+  }
+
+  if (!keyPair && seedPhrase !== '') {
+    const { secretKey } = parseSeedPhrase(seedPhrase, seedPath);
+    const _keyPair = nearAPI.utils.KeyPair.fromString(secretKey);
+    const publicKeyString = _keyPair.publicKey.toString();
+    if (accessKeys.some(({ public_key }) => public_key === publicKeyString)) {
+      console.log("Using seed phrase key")
+      keyPair = _keyPair;
+    } else {
+      console.log("The public key of the specified seed-phrase-derived key does not match any of the keys on the contract")
+    }
+  }
+
+  if (keyPair) {
+    contract.connection.signer = await nearAPI.InMemorySigner.fromKeyPair(contract.connection.networkId, contract.accountId, keyPair);
+    return;
+  }
+
+  const {publicKey, path} = await utils.findPath(accessKeys.map(({public_key}) => public_key));
   if (path == null) {
-    alert(`Ledger path not found. Make sure to add it first in "Keys" section`);
+    alert(`Neither Ledger path or raw private key match the keys on the multisig contract. Make sure to add it first in "Keys" section or put the raw private key into the relevant field`);
     throw new Error(`No key found`);
   }
   console.log(`Found ${publicKey} at ${path}`);
