@@ -42,7 +42,7 @@ async function setAccountSigner(contract) {
     return;
   }
 
-  const {publicKey, path} = await utils.findPath(accessKeys.map(({public_key}) => public_key));
+  let {publicKey, path} = await utils.findPath(accessKeys.map(({public_key}) => public_key));
   if (path == null) {
     alert(`Neither Ledger path or raw private key match the keys on the multisig contract. Make sure to add it first in "Keys" section or put the raw private key into the relevant field`);
     throw new Error(`No key found`);
@@ -236,7 +236,7 @@ function computeVestingSchedule(authToken, public_key, vesting_start, vesting_en
       rawPrivateVestingSchedule: {
         vesting_schedule_with_salt: {
           vesting_schedule: vestingSchedule,
-          salt,
+          salt: salt.toString('base64'),
         },
       },
       vestingHash,
