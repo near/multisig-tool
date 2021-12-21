@@ -170,16 +170,51 @@ async function vestingTermination(contract, requestKind) {
   }
 }
 
-function dateToEpoch(date) {
-  return Math.floor(date.getTime() / 1000.0 * 1000000)
+// Copy-paste from near-claims
+function dateToNs(dateObj) {
+    if (!(dateObj instanceof Date) && typeof dateObj !== 'number') {
+        throw new Error(`Must be Date or number, got ${typeof dateObj}: ${dateObj}`);
+    }
+    if (dateObj instanceof Date) {
+        dateObj = dateObj.getTime();
+    }
+    // Time from getTime is in millis, we need nanos - multiple by 1M.
+    return (dateObj * 1000000).toString();
+}
+
+// Copy-paste from near-claims `computeVestingHash`
+function computeVestingSchedule(authToken, public_key, vesting_start, vesting_end, vesting_cliff) {
+    const vestingSchedule = {
+        vesting_start: dateToNs(vesting_start),
+        vesting_end: dateToNs(vesting_end),
+        vesting_cliff: dateToNs(vesting_cliff)
+    };
+    const salt = Buffer.from(sha256(Buffer.from(authToken + public_key)), 'hex');
+    let writer = new nearAPI.utils.serialize.BinaryWriter();
+    writer.writeU64(vestingSchedule.vesting_start);
+    writer.writeU64(vestingSchedule.vesting_cliff);
+    writer.writeU64(vestingSchedule.vesting_end);
+    writer.writeU32(salt.length);
+    writer.writeBuffer(salt);
+    const bytes = writer.toArray();
+    vestingHash = Buffer.from(sha256(bytes), 'hex').toString('base64');
+    return {
+      rawPrivateVestingSchedule: {
+        vesting_schedule_with_salt: {
+          vesting_schedule: vestingSchedule,
+          salt,
+        },
+      },
+      vestingHash,
+    }
 }
 
 async function vestingPrivateTermination(contract, requestKind) {
   let accountId = contract.accountId;
   let lockupAccountId = document.querySelector('#lockup-account-id').value;
-  let lockupVestingStartDate = dateToEpoch(new Date(document.querySelector('#lockup-vesting-start-date').value));
-  let lockupVestingEndDate = dateToEpoch(new Date(document.querySelector('#lockup-vesting-end-date').value));
-  let lockupVestingCliffDate = dateToEpoch(new Date(document.querySelector('#lockup-vesting-cliff-date').value));
+  let lockupVestingStartDate = new Date(document.querySelector('#lockup-vesting-start-date').value);
+  let lockupVestingEndDate = new Date(document.querySelector('#lockup-vesting-end-date').value);
+  let lockupVestingCliffDate = new Date(document.querySelector('#lockup-vesting-cliff-date').value);
   let lockupVestingSalt = document.querySelector('#lockup-vesting-salt').value;
   if (!await utils.accountExists(window.near.connection, lockupAccountId)) {
     alert(`Account ${lockupAccountId} doesn't exist`);
@@ -188,23 +223,55 @@ async function vestingPrivateTermination(contract, requestKind) {
   const lockupAccount = await window.near.account(lockupAccountId);
   console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
 
-  let publicKeyStr = document.querySelector('#new-key').value;
-  let publicKey = nearAPI.utils.PublicKey.fromString(publicKeyStr);
+  let lockupContract = new nearAPI.Contract(
+    lockupAccount,
+    lockupAccount.accountId,
+    {
+      viewMethods: [
+        'get_owner_account_id',
+        'get_vesting_information',
+      ]
+    }
+  );
 
-  const salt = Buffer.from(sha256(Buffer.from(lockupVestingSalt + publicKey)), 'hex').toString('base64');
-
-  let args = {
-    vesting_schedule_with_salt:
-      {
-        vesting_schedule:
-          {
-            start_timestamp: lockupVestingStartDate.toString(),
-            cliff_timestamp: lockupVestingCliffDate.toString(),
-            end_timestamp: lockupVestingEndDate.toString()
-          },
-        salt
-      }
+  let lockupOwnerAccountId = await lockupContract.get_owner_account_id();
+  let lockupOwnerMoniker;
+  if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
+    lockupOwnerMoniker = nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex'));
+  } else {
+    lockupOwnerMoniker = lockupOwnerAccountId
   }
+
+  const salt = Buffer.from(sha256(Buffer.from(lockupVestingSalt + lockupOwnerMoniker)), 'hex').toString('base64');
+
+  let args;
+
+  let vestingInformation = await lockupContract.get_vesting_information();
+  for (let timezone = -12; timezone <= 12; timezone += 1) {
+    let lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
+    lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
+    let lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
+    lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
+    let lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
+    lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
+    let { rawPrivateVestingSchedule, vestingHash } = computeVestingSchedule(
+      lockupVestingSalt,
+      lockupOwnerMoniker,
+      lockupVestingStartDateCopy,
+      lockupVestingEndDateCopy,
+      lockupVestingCliffDateCopy
+    )
+    if (vestingInformation.VestingHash === vestingHash) {
+      args = rawPrivateVestingSchedule;
+      break;
+    }
+  }
+
+  if (!args) {
+    alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
+    return;
+  }
+
   //console.log(args);
   //args = Buffer.from(JSON.stringify(args)).toString('base64');
   //console.log(args);
