@@ -219,26 +219,22 @@ function dateToNs(dateObj) {
 // Copy-paste from near-claims `computeVestingHash`
 function computeVestingSchedule(authToken, public_key, vesting_start, vesting_end, vesting_cliff) {
     const vestingSchedule = {
-        vesting_start: dateToNs(vesting_start),
-        vesting_end: dateToNs(vesting_end),
-        vesting_cliff: dateToNs(vesting_cliff)
+        start_timestamp: dateToNs(vesting_start),
+        cliff_timestamp: dateToNs(vesting_cliff)
+        end_timestamp: dateToNs(vesting_end),
     };
     const salt = Buffer.from(sha256(Buffer.from(authToken + public_key)), 'hex');
     let writer = new nearAPI.utils.serialize.BinaryWriter();
-    writer.writeU64(vestingSchedule.vesting_start);
-    writer.writeU64(vestingSchedule.vesting_cliff);
-    writer.writeU64(vestingSchedule.vesting_end);
+    writer.writeU64(vestingSchedule.start_timestamp);
+    writer.writeU64(vestingSchedule.cliff_timestamp);
+    writer.writeU64(vestingSchedule.end_timestamp);
     writer.writeU32(salt.length);
     writer.writeBuffer(salt);
     const bytes = writer.toArray();
     vestingHash = Buffer.from(sha256(bytes), 'hex').toString('base64');
     return {
-      rawPrivateVestingSchedule: {
-        vesting_schedule_with_salt: {
-          vesting_schedule: vestingSchedule,
-          salt: salt.toString('base64'),
-        },
-      },
+      vestingSchedule,
+      salt,
       vestingHash,
     }
 }
@@ -288,7 +284,7 @@ async function vestingPrivateTermination(contract, requestKind) {
     lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
     let lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
     lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
-    let { rawPrivateVestingSchedule, vestingHash } = computeVestingSchedule(
+    let { vestingSchedule, salt, vestingHash } = computeVestingSchedule(
       lockupVestingSalt,
       lockupOwnerMoniker,
       lockupVestingStartDateCopy,
@@ -296,7 +292,12 @@ async function vestingPrivateTermination(contract, requestKind) {
       lockupVestingCliffDateCopy
     )
     if (vestingInformation.VestingHash === vestingHash) {
-      args = rawPrivateVestingSchedule;
+      args = {
+        vesting_schedule_with_salt: {
+          vesting_schedule: vestingSchedule,
+          salt: salt.toString('base64'),
+        }
+      }
       break;
     }
   }
