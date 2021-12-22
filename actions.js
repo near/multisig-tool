@@ -220,7 +220,7 @@ function dateToNs(dateObj) {
 function computeVestingSchedule(authToken, public_key, vesting_start, vesting_end, vesting_cliff) {
     const vestingSchedule = {
         start_timestamp: dateToNs(vesting_start),
-        cliff_timestamp: dateToNs(vesting_cliff)
+        cliff_timestamp: dateToNs(vesting_cliff),
         end_timestamp: dateToNs(vesting_end),
     };
     const salt = Buffer.from(sha256(Buffer.from(authToken + public_key)), 'hex');
