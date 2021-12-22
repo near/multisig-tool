@@ -71358,8 +71358,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _readOnlyError(name) { throw new TypeError("\"" + name + "\" is read-only"); }
-
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -71457,7 +71455,7 @@ function _setAccountSigner() {
 
           case 24:
             client = _context3.sent;
-            nearAPI.utils.PublicKey.fromString(publicKey), _readOnlyError("publicKey");
+            publicKey = nearAPI.utils.PublicKey.fromString(publicKey);
             contract.connection.signer = {
               getPublicKey: function getPublicKey() {
                 return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
@@ -71837,26 +71835,22 @@ function dateToNs(dateObj) {
 
 function computeVestingSchedule(authToken, public_key, vesting_start, vesting_end, vesting_cliff) {
   var vestingSchedule = {
-    vesting_start: dateToNs(vesting_start),
-    vesting_end: dateToNs(vesting_end),
-    vesting_cliff: dateToNs(vesting_cliff)
+    start_timestamp: dateToNs(vesting_start),
+    cliff_timestamp: dateToNs(vesting_cliff),
+    end_timestamp: dateToNs(vesting_end)
   };
   var salt = Buffer.from((0, _jsSha.default)(Buffer.from(authToken + public_key)), 'hex');
   var writer = new nearAPI.utils.serialize.BinaryWriter();
-  writer.writeU64(vestingSchedule.vesting_start);
-  writer.writeU64(vestingSchedule.vesting_cliff);
-  writer.writeU64(vestingSchedule.vesting_end);
+  writer.writeU64(vestingSchedule.start_timestamp);
+  writer.writeU64(vestingSchedule.cliff_timestamp);
+  writer.writeU64(vestingSchedule.end_timestamp);
   writer.writeU32(salt.length);
   writer.writeBuffer(salt);
   var bytes = writer.toArray();
   vestingHash = Buffer.from((0, _jsSha.default)(bytes), 'hex').toString('base64');
   return {
-    rawPrivateVestingSchedule: {
-      vesting_schedule_with_salt: {
-        vesting_schedule: vestingSchedule,
-        salt: salt
-      }
-    },
+    vestingSchedule: vestingSchedule,
+    salt: salt,
     vestingHash: vestingHash
   };
 }
@@ -71867,7 +71861,7 @@ function vestingPrivateTermination(_x10, _x11) {
 
 function _vestingPrivateTermination() {
   _vestingPrivateTermination = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(contract, requestKind) {
-    var accountId, lockupAccountId, lockupVestingStartDate, lockupVestingEndDate, lockupVestingCliffDate, lockupVestingSalt, lockupAccount, lockupContract, lockupOwnerAccountId, lockupOwnerMoniker, salt, args, vestingInformation, timezone, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy, _computeVestingSchedu, rawPrivateVestingSchedule, _vestingHash;
+    var accountId, lockupAccountId, lockupVestingStartDate, lockupVestingEndDate, lockupVestingCliffDate, lockupVestingSalt, lockupAccount, lockupContract, lockupOwnerAccountId, lockupOwnerMoniker, salt, args, vestingInformation, timezone, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy, _computeVestingSchedu, vestingSchedule, _salt, _vestingHash;
 
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -71933,14 +71927,19 @@ function _vestingPrivateTermination() {
             lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
             lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
             lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
-            _computeVestingSchedu = computeVestingSchedule(lockupVestingSalt, lockupOwnerMoniker, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy), rawPrivateVestingSchedule = _computeVestingSchedu.rawPrivateVestingSchedule, _vestingHash = _computeVestingSchedu.vestingHash;
+            _computeVestingSchedu = computeVestingSchedule(lockupVestingSalt, lockupOwnerMoniker, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy), vestingSchedule = _computeVestingSchedu.vestingSchedule, _salt = _computeVestingSchedu.salt, _vestingHash = _computeVestingSchedu.vestingHash;
 
             if (!(vestingInformation.VestingHash === _vestingHash)) {
               _context9.next = 36;
               break;
             }
 
-            args = rawPrivateVestingSchedule;
+            args = {
+              vesting_schedule_with_salt: {
+                vesting_schedule: vestingSchedule,
+                salt: _salt.toString('base64')
+              }
+            };
             return _context9.abrupt("break", 39);
 
           case 36:
@@ -72613,8 +72612,8 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 var options = {
-  nodeUrl: 'https://rpc.testnet.near.org',
-  networkId: 'testnet',
+  nodeUrl: 'https://rpc.mainnet.near.org',
+  networkId: 'mainnet',
   deps: {}
 };
 
@@ -73258,7 +73257,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39045" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49668" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
