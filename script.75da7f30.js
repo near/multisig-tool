@@ -46258,36 +46258,52 @@ module.exports = crt
 
 },{"bn.js":"node_modules/bn.js/lib/bn.js","randombytes":"node_modules/randombytes/browser.js","buffer":"node_modules/buffer/index.js"}],"node_modules/elliptic/package.json":[function(require,module,exports) {
 module.exports = {
-  "name": "elliptic",
-  "version": "6.5.4",
-  "description": "EC cryptography",
-  "main": "lib/elliptic.js",
-  "files": [
-    "lib"
+  "_args": [
+    [
+      "elliptic@6.5.4",
+      "/Users/frol/projects/near/multisig-tool"
+    ]
   ],
-  "scripts": {
-    "lint": "eslint lib test",
-    "lint:fix": "npm run lint -- --fix",
-    "unit": "istanbul test _mocha --reporter=spec test/index.js",
-    "test": "npm run lint && npm run unit",
-    "version": "grunt dist && git add dist/"
+  "_from": "elliptic@6.5.4",
+  "_id": "elliptic@6.5.4",
+  "_inBundle": false,
+  "_integrity": "sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==",
+  "_location": "/elliptic",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "elliptic@6.5.4",
+    "name": "elliptic",
+    "escapedName": "elliptic",
+    "rawSpec": "6.5.4",
+    "saveSpec": null,
+    "fetchSpec": "6.5.4"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:indutny/elliptic"
-  },
-  "keywords": [
-    "EC",
-    "Elliptic",
-    "curve",
-    "Cryptography"
+  "_requiredBy": [
+    "/browserify-sign",
+    "/create-ecdh"
   ],
-  "author": "Fedor Indutny <fedor@indutny.com>",
-  "license": "MIT",
+  "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.5.4.tgz",
+  "_spec": "6.5.4",
+  "_where": "/Users/frol/projects/near/multisig-tool",
+  "author": {
+    "name": "Fedor Indutny",
+    "email": "fedor@indutny.com"
+  },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
   },
-  "homepage": "https://github.com/indutny/elliptic",
+  "dependencies": {
+    "bn.js": "^4.11.9",
+    "brorand": "^1.1.0",
+    "hash.js": "^1.0.0",
+    "hmac-drbg": "^1.0.1",
+    "inherits": "^2.0.4",
+    "minimalistic-assert": "^1.0.1",
+    "minimalistic-crypto-utils": "^1.0.1"
+  },
+  "description": "EC cryptography",
   "devDependencies": {
     "brfs": "^2.0.2",
     "coveralls": "^3.1.0",
@@ -46303,15 +46319,31 @@ module.exports = {
     "istanbul": "^0.4.5",
     "mocha": "^8.0.1"
   },
-  "dependencies": {
-    "bn.js": "^4.11.9",
-    "brorand": "^1.1.0",
-    "hash.js": "^1.0.0",
-    "hmac-drbg": "^1.0.1",
-    "inherits": "^2.0.4",
-    "minimalistic-assert": "^1.0.1",
-    "minimalistic-crypto-utils": "^1.0.1"
-  }
+  "files": [
+    "lib"
+  ],
+  "homepage": "https://github.com/indutny/elliptic",
+  "keywords": [
+    "EC",
+    "Elliptic",
+    "curve",
+    "Cryptography"
+  ],
+  "license": "MIT",
+  "main": "lib/elliptic.js",
+  "name": "elliptic",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/indutny/elliptic.git"
+  },
+  "scripts": {
+    "lint": "eslint lib test",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "npm run lint && npm run unit",
+    "unit": "istanbul test _mocha --reporter=spec test/index.js",
+    "version": "grunt dist && git add dist/"
+  },
+  "version": "6.5.4"
 }
 ;
 },{}],"node_modules/elliptic/node_modules/bn.js/lib/bn.js":[function(require,module,exports) {
@@ -71861,104 +71893,101 @@ function vestingPrivateTermination(_x10, _x11) {
 
 function _vestingPrivateTermination() {
   _vestingPrivateTermination = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(contract, requestKind) {
-    var accountId, lockupAccountId, lockupVestingStartDate, lockupVestingEndDate, lockupVestingCliffDate, lockupVestingSalt, lockupAccount, lockupContract, lockupOwnerAccountId, lockupOwnerMoniker, salt, args, vestingInformation, timezone, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy, _computeVestingSchedu, vestingSchedule, _salt, _vestingHash;
-
+    var accountId, lockupAccountId, lockupVestingStartDate, lockupVestingEndDate, lockupVestingCliffDate, lockupVestingSalt, lockupAccount, lockupContract, lockupOwnerAccountId, vestingInformation, findProperVestingSchedule, args;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
+            findProperVestingSchedule = function _findProperVestingSch() {
+              var lockupOwnerInputs = [lockupOwnerAccountId];
+
+              if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
+                lockupOwnerInputs.push(nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex')));
+              }
+
+              for (var lockupOwnerInputId = 0; lockupOwnerInputId < lockupOwnerInputs.length; ++lockupOwnerInputId) {
+                var lockupOwnerInput = lockupOwnerInputs[lockupOwnerInputId];
+                var salt = Buffer.from((0, _jsSha.default)(Buffer.from(lockupVestingSalt + lockupOwnerInput)), 'hex').toString('base64');
+                console.log('salt', lockupVestingSalt, lockupOwnerInput);
+
+                for (var timezone = -12; timezone <= 12; timezone += 1) {
+                  var lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
+                  lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
+                  var lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
+                  lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
+                  var lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
+                  lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
+
+                  var _computeVestingSchedu = computeVestingSchedule(lockupVestingSalt, lockupOwnerInput, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy),
+                      vestingSchedule = _computeVestingSchedu.vestingSchedule,
+                      _salt = _computeVestingSchedu.salt,
+                      _vestingHash = _computeVestingSchedu.vestingHash;
+
+                  console.log("vest", vestingSchedule, _salt.toString('base64'), _vestingHash, vestingInformation);
+
+                  if (vestingInformation.VestingHash === _vestingHash) {
+                    return {
+                      vesting_schedule_with_salt: {
+                        vesting_schedule: vestingSchedule,
+                        salt: _salt.toString('base64')
+                      }
+                    };
+                  }
+                }
+              }
+            };
+
             accountId = contract.accountId;
             lockupAccountId = document.querySelector('#lockup-account-id').value;
             lockupVestingStartDate = new Date(document.querySelector('#lockup-vesting-start-date').value);
             lockupVestingEndDate = new Date(document.querySelector('#lockup-vesting-end-date').value);
             lockupVestingCliffDate = new Date(document.querySelector('#lockup-vesting-cliff-date').value);
             lockupVestingSalt = document.querySelector('#lockup-vesting-salt').value;
-            _context9.next = 8;
+            _context9.next = 9;
             return utils.accountExists(window.near.connection, lockupAccountId);
 
-          case 8:
+          case 9:
             if (_context9.sent) {
-              _context9.next = 11;
+              _context9.next = 12;
               break;
             }
 
             alert("Account ".concat(lockupAccountId, " doesn't exist"));
             return _context9.abrupt("return");
 
-          case 11:
-            _context9.next = 13;
+          case 12:
+            _context9.next = 14;
             return window.near.account(lockupAccountId);
 
-          case 13:
+          case 14:
             lockupAccount = _context9.sent;
             console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
             lockupContract = new nearAPI.Contract(lockupAccount, lockupAccount.accountId, {
               viewMethods: ['get_owner_account_id', 'get_vesting_information']
             });
-            _context9.next = 18;
+            _context9.next = 19;
             return lockupContract.get_owner_account_id();
 
-          case 18:
+          case 19:
             lockupOwnerAccountId = _context9.sent;
-
-            if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
-              lockupOwnerMoniker = nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex'));
-            } else {
-              lockupOwnerMoniker = lockupOwnerAccountId;
-            }
-
-            salt = Buffer.from((0, _jsSha.default)(Buffer.from(lockupVestingSalt + lockupOwnerMoniker)), 'hex').toString('base64');
-            _context9.next = 23;
+            _context9.next = 22;
             return lockupContract.get_vesting_information();
 
-          case 23:
+          case 22:
             vestingInformation = _context9.sent;
-            timezone = -12;
+            args = findProperVestingSchedule();
 
-          case 25:
-            if (!(timezone <= 12)) {
-              _context9.next = 39;
-              break;
-            }
-
-            lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
-            lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
-            lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
-            lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
-            lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
-            lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
-            _computeVestingSchedu = computeVestingSchedule(lockupVestingSalt, lockupOwnerMoniker, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy), vestingSchedule = _computeVestingSchedu.vestingSchedule, _salt = _computeVestingSchedu.salt, _vestingHash = _computeVestingSchedu.vestingHash;
-
-            if (!(vestingInformation.VestingHash === _vestingHash)) {
-              _context9.next = 36;
-              break;
-            }
-
-            args = {
-              vesting_schedule_with_salt: {
-                vesting_schedule: vestingSchedule,
-                salt: _salt.toString('base64')
-              }
-            };
-            return _context9.abrupt("break", 39);
-
-          case 36:
-            timezone += 1;
-            _context9.next = 25;
-            break;
-
-          case 39:
             if (args) {
-              _context9.next = 42;
+              _context9.next = 27;
               break;
             }
 
             alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
             return _context9.abrupt("return");
 
-          case 42:
-            _context9.prev = 42;
-            _context9.next = 45;
+          case 27:
+            _context9.prev = 27;
+            _context9.next = 30;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -71966,21 +71995,21 @@ function _vestingPrivateTermination() {
               }
             });
 
-          case 45:
-            _context9.next = 50;
+          case 30:
+            _context9.next = 35;
             break;
 
-          case 47:
-            _context9.prev = 47;
-            _context9.t0 = _context9["catch"](42);
+          case 32:
+            _context9.prev = 32;
+            _context9.t0 = _context9["catch"](27);
             console.log(_context9.t0);
 
-          case 50:
+          case 35:
           case "end":
             return _context9.stop();
         }
       }
-    }, _callee9, null, [[42, 47]]);
+    }, _callee9, null, [[27, 32]]);
   }));
   return _vestingPrivateTermination.apply(this, arguments);
 }
@@ -72077,119 +72106,116 @@ function _submitRequest() {
           case 2:
             contract = _context12.sent;
             _context12.prev = 3;
-            _context12.next = 6;
-            return setAccountSigner(contract);
 
-          case 6:
             if (!(requestKind === "add_key" || requestKind === "add_request_key")) {
-              _context12.next = 11;
+              _context12.next = 9;
               break;
             }
 
-            _context12.next = 9;
+            _context12.next = 7;
             return addKey(contract, requestKind === "add_request_key");
 
-          case 9:
-            _context12.next = 42;
+          case 7:
+            _context12.next = 40;
             break;
 
-          case 11:
+          case 9:
             if (!(requestKind === "transfer" || requestKind === "transfer_lockup")) {
-              _context12.next = 16;
+              _context12.next = 14;
               break;
             }
 
-            _context12.next = 14;
+            _context12.next = 12;
             return transfer(contract, requestKind === "transfer_lockup");
 
-          case 14:
-            _context12.next = 42;
+          case 12:
+            _context12.next = 40;
             break;
 
-          case 16:
+          case 14:
             if (!(requestKind === "num_confirmations")) {
-              _context12.next = 21;
+              _context12.next = 19;
               break;
             }
 
-            _context12.next = 19;
+            _context12.next = 17;
             return setNumConfirmations(contract);
 
-          case 19:
-            _context12.next = 42;
+          case 17:
+            _context12.next = 40;
             break;
 
-          case 21:
+          case 19:
             if (!(requestKind === "terminate_vesting" || requestKind === "termination_withdraw")) {
-              _context12.next = 26;
+              _context12.next = 24;
               break;
             }
 
-            _context12.next = 24;
+            _context12.next = 22;
             return vestingTermination(contract, requestKind);
 
-          case 24:
-            _context12.next = 42;
+          case 22:
+            _context12.next = 40;
             break;
 
-          case 26:
+          case 24:
             if (!(requestKind === "terminate_private_vesting")) {
-              _context12.next = 31;
+              _context12.next = 29;
               break;
             }
 
-            _context12.next = 29;
+            _context12.next = 27;
             return vestingPrivateTermination(contract, requestKind);
 
-          case 29:
-            _context12.next = 42;
+          case 27:
+            _context12.next = 40;
             break;
 
-          case 31:
+          case 29:
             if (!(requestKind === "multisig")) {
-              _context12.next = 36;
+              _context12.next = 34;
               break;
             }
 
-            _context12.next = 34;
+            _context12.next = 32;
             return setupMultisig(contract);
 
-          case 34:
-            _context12.next = 42;
+          case 32:
+            _context12.next = 40;
             break;
 
-          case 36:
+          case 34:
             if (!(requestKind === "lockup")) {
-              _context12.next = 41;
+              _context12.next = 39;
               break;
             }
 
-            _context12.next = 39;
+            _context12.next = 37;
             return setupLockup(contract);
 
-          case 39:
-            _context12.next = 42;
+          case 37:
+            _context12.next = 40;
             break;
 
-          case 41:
+          case 39:
             alert("Unkonwn request kind: ".concat(requestKind));
 
-          case 42:
-            _context12.next = 48;
+          case 40:
+            _context12.next = 46;
             break;
 
-          case 44:
-            _context12.prev = 44;
+          case 42:
+            _context12.prev = 42;
             _context12.t0 = _context12["catch"](3);
             console.log(_context12.t0);
             alert(_context12.t0);
 
-          case 48:
+          case 46:
           case "end":
             return _context12.stop();
         }
       }
-    }, _callee12, null, [[3, 44]]);
+    }, _callee12, null, [[3, 42]]);
   }));
   return _submitRequest.apply(this, arguments);
 }
@@ -73257,7 +73283,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49668" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51720" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
