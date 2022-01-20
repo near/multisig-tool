@@ -205,7 +205,7 @@ async function vestingTermination(contract, requestKind) {
         request: {
           receiver_id: lockupAccountId,
           actions: [
-            funcCall("terminate_vesting", {})
+            funcCall("terminate_vesting", {}, '0', '25000000000000')
           ]
         }
       });
@@ -220,7 +220,7 @@ async function vestingTermination(contract, requestKind) {
           request: {
             receiver_id: lockupAccountId,
             actions: [
-              funcCall("termination_prepare_to_withdraw", {})
+              funcCall("termination_prepare_to_withdraw", {}, '0', '175000000000000')
             ]
           }
         });
@@ -234,7 +234,7 @@ async function vestingTermination(contract, requestKind) {
           request: {
             receiver_id: lockupAccountId,
             actions: [
-              funcCall("termination_withdraw", {receiver_id: accountId})
+              funcCall("termination_withdraw", {receiver_id: accountId}, '0', '75000000000000')
             ]
           }
         });
@@ -358,7 +358,7 @@ async function vestingPrivateTermination(contract, requestKind) {
       await contract.functionCall(accountId, 'add_request', {
         request: {
           receiver_id: lockupAccountId,
-          actions: [funcCall("terminate_vesting", args)],
+          actions: [funcCall("terminate_vesting", args, '0', '25000000000000')],
         }
       });
     } catch (e) {
