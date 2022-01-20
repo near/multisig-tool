@@ -176,31 +176,71 @@ async function setNumConfirmations(contract) {
 
 async function vestingTermination(contract, requestKind) {
   let accountId = contract.accountId;
-  let lockupAccountId = document.querySelector('#lockup-account-id').value;
-  if (!await utils.accountExists(window.near.connection, lockupAccountId)) {
-    alert(`Account ${lockupAccountId} doesn't exist`);
-    return;
-  }
-  const lockupAccount = await window.near.account(lockupAccountId);
-  console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
-  if (requestKind === "terminate_vesting") {
-    await contract.functionCall(accountId, 'add_request', {
-      request: {
-        receiver_id: lockupAccountId,
-        actions: [
-          funcCall("terminate_vesting", {})
+  let lockupAccountIds = document.querySelector('#lockup-account-ids').value.split(/\r?\n/);
+  for (let lockupAccountId of lockupAccountIds) {
+    if (!await utils.accountExists(window.near.connection, lockupAccountId)) {
+      alert(`Account ${lockupAccountId} doesn't exist`);
+      continue;
+    }
+    console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
+    const lockupAccount = await window.near.account(lockupAccountId);
+    let lockupContract = new nearAPI.Contract(
+      lockupAccount,
+      lockupAccount.accountId,
+      {
+        viewMethods: [
+          'get_vesting_information',
+          'get_termination_status',
         ]
       }
-    });
-  } else if (requestKind === "termination_withdraw") {
-    await contract.functionCall(accountId, 'add_request', {
-      request: {
-        receiver_id: lockupAccountId,
-        actions: [
-          funcCall("termination_withdraw", {receiver_id: accountId})
-        ]
+    );
+    let lockupVestingInformation = await lockupContract.get_vesting_information();
+    
+    if (requestKind === "terminate_vesting") {
+      if (!('VestingSchedule' in lockupVestingInformation)) {
+        alert(`Account ${lockupAccountId} has no public vesting schedule (either it was terminated before, or it is in termination process, or it has private vesting)`)
+        continue;
       }
-    });
+      await contract.functionCall(accountId, 'add_request', {
+        request: {
+          receiver_id: lockupAccountId,
+          actions: [
+            funcCall("terminate_vesting", {})
+          ]
+        }
+      });
+    } else if (requestKind === "termination_withdraw") {
+      if (!('Terminating' in lockupVestingInformation)) {
+        alert(`Vesting termination is not initialized on ${lockupAccountId}`)
+        continue;
+      }
+      let lockupTerminationStatus = await lockupContract.get_termination_status();
+      if (lockupTerminationStatus === 'VestingTerminatedWithDeficit' || lockupTerminationStatus === 'EverythingUnstaked') {
+        await contract.functionCall(accountId, 'add_request', {
+          request: {
+            receiver_id: lockupAccountId,
+            actions: [
+              funcCall("termination_prepare_to_withdraw", {})
+            ]
+          }
+        });
+        if (lockupTerminationStatus === 'VestingTerminatedWithDeficit') {
+          alert(`Account ${lockupAccountId} will the tokens unstaked after confirmation (get back to "Try Withdraw" in 2 days after the confirmation)`)
+        } else {
+          alert(`Account ${lockupAccountId} will get the tokens withdrawn from the staking pool after confirmation (get back to "Try Withdraw" immediately after the confirmation to withdraw the funds back to foundation)`)
+        }
+      } else {
+        await contract.functionCall(accountId, 'add_request', {
+          request: {
+            receiver_id: lockupAccountId,
+            actions: [
+              funcCall("termination_withdraw", {receiver_id: accountId})
+            ]
+          }
+        });
+        alert(`Account ${lockupAccountId} will get the tokens withdrawn to foundation and the termination will be completed after confirmation!`)
+      }
+    }
   }
 }
 
@@ -241,89 +281,90 @@ function computeVestingSchedule(authToken, public_key, vesting_start, vesting_en
 
 async function vestingPrivateTermination(contract, requestKind) {
   let accountId = contract.accountId;
-  let lockupAccountId = document.querySelector('#lockup-account-id').value;
+  let lockupAccountIds = document.querySelector('#lockup-account-ids').value.split(/\r?\n/);
   let lockupVestingStartDate = new Date(document.querySelector('#lockup-vesting-start-date').value);
   let lockupVestingEndDate = new Date(document.querySelector('#lockup-vesting-end-date').value);
   let lockupVestingCliffDate = new Date(document.querySelector('#lockup-vesting-cliff-date').value);
   let lockupVestingSalt = document.querySelector('#lockup-vesting-salt').value;
-  if (!await utils.accountExists(window.near.connection, lockupAccountId)) {
-    alert(`Account ${lockupAccountId} doesn't exist`);
-    return;
-  }
-  const lockupAccount = await window.near.account(lockupAccountId);
-  console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
-
-  let lockupContract = new nearAPI.Contract(
-    lockupAccount,
-    lockupAccount.accountId,
-    {
-      viewMethods: [
-        'get_owner_account_id',
-        'get_vesting_information',
-      ]
+  for (let lockupAccountId of lockupAccountIds) {
+    if (!await utils.accountExists(window.near.connection, lockupAccountId)) {
+      alert(`Account ${lockupAccountId} doesn't exist`);
+      continue;
     }
-  );
+    const lockupAccount = await window.near.account(lockupAccountId);
+    console.log(`Vesting ${requestKind} for ${lockupAccountId}`);
 
-  let lockupOwnerAccountId = await lockupContract.get_owner_account_id();
-  let vestingInformation = await lockupContract.get_vesting_information();
+    let lockupContract = new nearAPI.Contract(
+      lockupAccount,
+      lockupAccount.accountId,
+      {
+        viewMethods: [
+          'get_owner_account_id',
+          'get_vesting_information',
+        ]
+      }
+    );
 
-  function findProperVestingSchedule() {
-    // According to near-claims, user might have either specified the owner
-    // account id (named or implicit) or a public key (a new implicit account
-    // id was automatically created)
-    let lockupOwnerInputs = [lockupOwnerAccountId];
-    if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
-      lockupOwnerInputs.push(nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex')));
-    }
+    let lockupOwnerAccountId = await lockupContract.get_owner_account_id();
+    let vestingInformation = await lockupContract.get_vesting_information();
 
-    for (let lockupOwnerInputId = 0; lockupOwnerInputId < lockupOwnerInputs.length; ++lockupOwnerInputId) {
-      let lockupOwnerInput = lockupOwnerInputs[lockupOwnerInputId];
-      const salt = Buffer.from(sha256(Buffer.from(lockupVestingSalt + lockupOwnerInput)), 'hex').toString('base64');
+    function findProperVestingSchedule() {
+      // According to near-claims, user might have either specified the owner
+      // account id (named or implicit) or a public key (a new implicit account
+      // id was automatically created)
+      let lockupOwnerInputs = [lockupOwnerAccountId];
+      if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
+        lockupOwnerInputs.push(nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex')));
+      }
 
-      for (let timezone = -12; timezone <= 12; timezone += 1) {
-        let lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
-        lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
-        let lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
-        lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
-        let lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
-        lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
-        let { vestingSchedule, salt, vestingHash } = computeVestingSchedule(
-          lockupVestingSalt,
-          lockupOwnerInput,
-          lockupVestingStartDateCopy,
-          lockupVestingEndDateCopy,
-          lockupVestingCliffDateCopy
-        )
-        if (vestingInformation.VestingHash === vestingHash) {
-          return {
-            vesting_schedule_with_salt: {
-              vesting_schedule: vestingSchedule,
-              salt: salt.toString('base64'),
+      for (let lockupOwnerInputId = 0; lockupOwnerInputId < lockupOwnerInputs.length; ++lockupOwnerInputId) {
+        let lockupOwnerInput = lockupOwnerInputs[lockupOwnerInputId];
+        const salt = Buffer.from(sha256(Buffer.from(lockupVestingSalt + lockupOwnerInput)), 'hex').toString('base64');
+
+        for (let timezone = -12; timezone <= 12; timezone += 1) {
+          let lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
+          lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
+          let lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
+          lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
+          let lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
+          lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
+          let { vestingSchedule, salt, vestingHash } = computeVestingSchedule(
+            lockupVestingSalt,
+            lockupOwnerInput,
+            lockupVestingStartDateCopy,
+            lockupVestingEndDateCopy,
+            lockupVestingCliffDateCopy
+          )
+          if (vestingInformation.VestingHash === vestingHash) {
+            return {
+              vesting_schedule_with_salt: {
+                vesting_schedule: vestingSchedule,
+                salt: salt.toString('base64'),
+              }
             }
           }
         }
       }
     }
+
+    let args = findProperVestingSchedule();
+
+    if (!args) {
+      alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
+      return;
+    }
+
+    try {
+      await contract.functionCall(accountId, 'add_request', {
+        request: {
+          receiver_id: lockupAccountId,
+          actions: [funcCall("terminate_vesting", args)],
+        }
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }
-
-  let args = findProperVestingSchedule();
-
-  if (!args) {
-    alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
-    return;
-  }
-
-  try {
-    await contract.functionCall(accountId, 'add_request', {
-      request: {
-        receiver_id: lockupAccountId,
-        actions: [funcCall("terminate_vesting", args)],
-      }
-    });
-  } catch (e) {
-    console.log(e);
-  }
-
 }
 
 async function setupMultisig(contract) {
@@ -361,7 +402,7 @@ async function submitRequest(accountId, requestKind) {
       await transfer(contract, requestKind === "transfer_lockup");
     } else if (requestKind === "num_confirmations") {
       await setNumConfirmations(contract);
-    } else if (requestKind === "terminate_vesting" || requestKind === "termination_withdraw") {
+    } else if (requestKind === "terminate_vesting" || requestKind === "termination_unstake" || requestKind === "termination_withdraw") {
       await vestingTermination(contract, requestKind);
     } else if (requestKind === "terminate_private_vesting") {
       await vestingPrivateTermination(contract, requestKind);
