@@ -71390,6 +71390,12 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -71781,39 +71787,69 @@ function vestingTermination(_x8, _x9) {
 
 function _vestingTermination() {
   _vestingTermination = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8(contract, requestKind) {
-    var accountId, lockupAccountId, lockupAccount;
+    var accountId, lockupAccountIds, _iterator, _step, lockupAccountId, lockupAccount, lockupContract, lockupVestingInformation, lockupTerminationStatus;
+
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
             accountId = contract.accountId;
-            lockupAccountId = document.querySelector('#lockup-account-id').value;
-            _context8.next = 4;
+            lockupAccountIds = document.querySelector('#lockup-account-ids').value.split(/\r?\n/);
+            _iterator = _createForOfIteratorHelper(lockupAccountIds);
+            _context8.prev = 3;
+
+            _iterator.s();
+
+          case 5:
+            if ((_step = _iterator.n()).done) {
+              _context8.next = 46;
+              break;
+            }
+
+            lockupAccountId = _step.value;
+            _context8.next = 9;
             return utils.accountExists(window.near.connection, lockupAccountId);
 
-          case 4:
+          case 9:
             if (_context8.sent) {
-              _context8.next = 7;
+              _context8.next = 12;
               break;
             }
 
             alert("Account ".concat(lockupAccountId, " doesn't exist"));
-            return _context8.abrupt("return");
+            return _context8.abrupt("continue", 44);
 
-          case 7:
-            _context8.next = 9;
+          case 12:
+            console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
+            _context8.next = 15;
             return window.near.account(lockupAccountId);
 
-          case 9:
+          case 15:
             lockupAccount = _context8.sent;
-            console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
+            lockupContract = new nearAPI.Contract(lockupAccount, lockupAccount.accountId, {
+              viewMethods: ['get_vesting_information', 'get_termination_status']
+            });
+            _context8.next = 19;
+            return lockupContract.get_vesting_information();
+
+          case 19:
+            lockupVestingInformation = _context8.sent;
 
             if (!(requestKind === "terminate_vesting")) {
-              _context8.next = 16;
+              _context8.next = 28;
               break;
             }
 
-            _context8.next = 14;
+            if ('VestingSchedule' in lockupVestingInformation) {
+              _context8.next = 24;
+              break;
+            }
+
+            alert("Account ".concat(lockupAccountId, " has no public vesting schedule (either it was terminated before, or it is in termination process, or it has private vesting)"));
+            return _context8.abrupt("continue", 44);
+
+          case 24:
+            _context8.next = 26;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -71821,17 +71857,56 @@ function _vestingTermination() {
               }
             });
 
-          case 14:
-            _context8.next = 19;
+          case 26:
+            _context8.next = 44;
             break;
 
-          case 16:
+          case 28:
             if (!(requestKind === "termination_withdraw")) {
-              _context8.next = 19;
+              _context8.next = 44;
               break;
             }
 
-            _context8.next = 19;
+            if ('Terminating' in lockupVestingInformation) {
+              _context8.next = 32;
+              break;
+            }
+
+            alert("Vesting termination is not initialized on ".concat(lockupAccountId));
+            return _context8.abrupt("continue", 44);
+
+          case 32:
+            _context8.next = 34;
+            return lockupContract.get_termination_status();
+
+          case 34:
+            lockupTerminationStatus = _context8.sent;
+
+            if (!(lockupTerminationStatus === 'VestingTerminatedWithDeficit' || lockupTerminationStatus === 'EverythingUnstaked')) {
+              _context8.next = 41;
+              break;
+            }
+
+            _context8.next = 38;
+            return contract.functionCall(accountId, 'add_request', {
+              request: {
+                receiver_id: lockupAccountId,
+                actions: [funcCall("termination_prepare_to_withdraw", {})]
+              }
+            });
+
+          case 38:
+            if (lockupTerminationStatus === 'VestingTerminatedWithDeficit') {
+              alert("Account ".concat(lockupAccountId, " will the tokens unstaked after confirmation (get back to \"Try Withdraw\" in 2 days after the confirmation)"));
+            } else {
+              alert("Account ".concat(lockupAccountId, " will get the tokens withdrawn from the staking pool after confirmation (get back to \"Try Withdraw\" immediately after the confirmation to withdraw the funds back to foundation)"));
+            }
+
+            _context8.next = 44;
+            break;
+
+          case 41:
+            _context8.next = 43;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -71841,12 +71916,36 @@ function _vestingTermination() {
               }
             });
 
-          case 19:
+          case 43:
+            alert("Account ".concat(lockupAccountId, " will get the tokens withdrawn to foundation and the termination will be completed after confirmation!"));
+
+          case 44:
+            _context8.next = 5;
+            break;
+
+          case 46:
+            _context8.next = 51;
+            break;
+
+          case 48:
+            _context8.prev = 48;
+            _context8.t0 = _context8["catch"](3);
+
+            _iterator.e(_context8.t0);
+
+          case 51:
+            _context8.prev = 51;
+
+            _iterator.f();
+
+            return _context8.finish(51);
+
+          case 54:
           case "end":
             return _context8.stop();
         }
       }
-    }, _callee8);
+    }, _callee8, null, [[3, 48, 51, 54]]);
   }));
   return _vestingTermination.apply(this, arguments);
 }
@@ -71893,123 +71992,192 @@ function vestingPrivateTermination(_x10, _x11) {
 
 function _vestingPrivateTermination() {
   _vestingPrivateTermination = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(contract, requestKind) {
-    var accountId, lockupAccountId, lockupVestingStartDate, lockupVestingEndDate, lockupVestingCliffDate, lockupVestingSalt, lockupAccount, lockupContract, lockupOwnerAccountId, vestingInformation, findProperVestingSchedule, args;
-    return regeneratorRuntime.wrap(function _callee9$(_context9) {
+    var accountId, lockupAccountIds, lockupVestingStartDate, lockupVestingEndDate, lockupVestingCliffDate, lockupVestingSalt, _iterator2, _step2, _loop, _ret;
+
+    return regeneratorRuntime.wrap(function _callee9$(_context10) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
-            findProperVestingSchedule = function _findProperVestingSch() {
-              var lockupOwnerInputs = [lockupOwnerAccountId];
-
-              if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
-                lockupOwnerInputs.push(nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex')));
-              }
-
-              for (var lockupOwnerInputId = 0; lockupOwnerInputId < lockupOwnerInputs.length; ++lockupOwnerInputId) {
-                var lockupOwnerInput = lockupOwnerInputs[lockupOwnerInputId];
-                var salt = Buffer.from((0, _jsSha.default)(Buffer.from(lockupVestingSalt + lockupOwnerInput)), 'hex').toString('base64');
-                console.log('salt', lockupVestingSalt, lockupOwnerInput);
-
-                for (var timezone = -12; timezone <= 12; timezone += 1) {
-                  var lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
-                  lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
-                  var lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
-                  lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
-                  var lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
-                  lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
-
-                  var _computeVestingSchedu = computeVestingSchedule(lockupVestingSalt, lockupOwnerInput, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy),
-                      vestingSchedule = _computeVestingSchedu.vestingSchedule,
-                      _salt = _computeVestingSchedu.salt,
-                      _vestingHash = _computeVestingSchedu.vestingHash;
-
-                  console.log("vest", vestingSchedule, _salt.toString('base64'), _vestingHash, vestingInformation);
-
-                  if (vestingInformation.VestingHash === _vestingHash) {
-                    return {
-                      vesting_schedule_with_salt: {
-                        vesting_schedule: vestingSchedule,
-                        salt: _salt.toString('base64')
-                      }
-                    };
-                  }
-                }
-              }
-            };
-
             accountId = contract.accountId;
-            lockupAccountId = document.querySelector('#lockup-account-id').value;
+            lockupAccountIds = document.querySelector('#lockup-account-ids').value.split(/\r?\n/);
             lockupVestingStartDate = new Date(document.querySelector('#lockup-vesting-start-date').value);
             lockupVestingEndDate = new Date(document.querySelector('#lockup-vesting-end-date').value);
             lockupVestingCliffDate = new Date(document.querySelector('#lockup-vesting-cliff-date').value);
             lockupVestingSalt = document.querySelector('#lockup-vesting-salt').value;
-            _context9.next = 9;
-            return utils.accountExists(window.near.connection, lockupAccountId);
+            _iterator2 = _createForOfIteratorHelper(lockupAccountIds);
+            _context10.prev = 7;
+            _loop = /*#__PURE__*/regeneratorRuntime.mark(function _loop() {
+              var lockupAccountId, lockupAccount, lockupContract, lockupOwnerAccountId, vestingInformation, findProperVestingSchedule, args;
+              return regeneratorRuntime.wrap(function _loop$(_context9) {
+                while (1) {
+                  switch (_context9.prev = _context9.next) {
+                    case 0:
+                      findProperVestingSchedule = function _findProperVestingSch() {
+                        // According to near-claims, user might have either specified the owner
+                        // account id (named or implicit) or a public key (a new implicit account
+                        // id was automatically created)
+                        var lockupOwnerInputs = [lockupOwnerAccountId];
 
-          case 9:
-            if (_context9.sent) {
-              _context9.next = 12;
+                        if (lockupOwnerAccountId.length === 64 && !lockupOwnerAccountId.includes('.')) {
+                          lockupOwnerInputs.push(nearAPI.utils.serialize.base_encode(Buffer.from(lockupOwnerAccountId, 'hex')));
+                        }
+
+                        for (var lockupOwnerInputId = 0; lockupOwnerInputId < lockupOwnerInputs.length; ++lockupOwnerInputId) {
+                          var lockupOwnerInput = lockupOwnerInputs[lockupOwnerInputId];
+                          var salt = Buffer.from((0, _jsSha.default)(Buffer.from(lockupVestingSalt + lockupOwnerInput)), 'hex').toString('base64');
+
+                          for (var timezone = -12; timezone <= 12; timezone += 1) {
+                            var lockupVestingStartDateCopy = new Date(lockupVestingStartDate);
+                            lockupVestingStartDateCopy.setHours(lockupVestingStartDate.getHours() + timezone);
+                            var lockupVestingEndDateCopy = new Date(lockupVestingEndDate);
+                            lockupVestingEndDateCopy.setHours(lockupVestingEndDate.getHours() + timezone);
+                            var lockupVestingCliffDateCopy = new Date(lockupVestingCliffDate);
+                            lockupVestingCliffDateCopy.setHours(lockupVestingCliffDate.getHours() + timezone);
+
+                            var _computeVestingSchedu = computeVestingSchedule(lockupVestingSalt, lockupOwnerInput, lockupVestingStartDateCopy, lockupVestingEndDateCopy, lockupVestingCliffDateCopy),
+                                vestingSchedule = _computeVestingSchedu.vestingSchedule,
+                                _salt = _computeVestingSchedu.salt,
+                                _vestingHash = _computeVestingSchedu.vestingHash;
+
+                            if (vestingInformation.VestingHash === _vestingHash) {
+                              return {
+                                vesting_schedule_with_salt: {
+                                  vesting_schedule: vestingSchedule,
+                                  salt: _salt.toString('base64')
+                                }
+                              };
+                            }
+                          }
+                        }
+                      };
+
+                      lockupAccountId = _step2.value;
+                      _context9.next = 4;
+                      return utils.accountExists(window.near.connection, lockupAccountId);
+
+                    case 4:
+                      if (_context9.sent) {
+                        _context9.next = 7;
+                        break;
+                      }
+
+                      alert("Account ".concat(lockupAccountId, " doesn't exist"));
+                      return _context9.abrupt("return", "continue");
+
+                    case 7:
+                      _context9.next = 9;
+                      return window.near.account(lockupAccountId);
+
+                    case 9:
+                      lockupAccount = _context9.sent;
+                      console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
+                      lockupContract = new nearAPI.Contract(lockupAccount, lockupAccount.accountId, {
+                        viewMethods: ['get_owner_account_id', 'get_vesting_information']
+                      });
+                      _context9.next = 14;
+                      return lockupContract.get_owner_account_id();
+
+                    case 14:
+                      lockupOwnerAccountId = _context9.sent;
+                      _context9.next = 17;
+                      return lockupContract.get_vesting_information();
+
+                    case 17:
+                      vestingInformation = _context9.sent;
+                      args = findProperVestingSchedule();
+
+                      if (args) {
+                        _context9.next = 22;
+                        break;
+                      }
+
+                      alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
+                      return _context9.abrupt("return", {
+                        v: void 0
+                      });
+
+                    case 22:
+                      _context9.prev = 22;
+                      _context9.next = 25;
+                      return contract.functionCall(accountId, 'add_request', {
+                        request: {
+                          receiver_id: lockupAccountId,
+                          actions: [funcCall("terminate_vesting", args)]
+                        }
+                      });
+
+                    case 25:
+                      _context9.next = 30;
+                      break;
+
+                    case 27:
+                      _context9.prev = 27;
+                      _context9.t0 = _context9["catch"](22);
+                      console.log(_context9.t0);
+
+                    case 30:
+                    case "end":
+                      return _context9.stop();
+                  }
+                }
+              }, _loop, null, [[22, 27]]);
+            });
+
+            _iterator2.s();
+
+          case 10:
+            if ((_step2 = _iterator2.n()).done) {
+              _context10.next = 19;
               break;
             }
 
-            alert("Account ".concat(lockupAccountId, " doesn't exist"));
-            return _context9.abrupt("return");
+            return _context10.delegateYield(_loop(), "t0", 12);
 
           case 12:
-            _context9.next = 14;
-            return window.near.account(lockupAccountId);
+            _ret = _context10.t0;
 
-          case 14:
-            lockupAccount = _context9.sent;
-            console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
-            lockupContract = new nearAPI.Contract(lockupAccount, lockupAccount.accountId, {
-              viewMethods: ['get_owner_account_id', 'get_vesting_information']
-            });
-            _context9.next = 19;
-            return lockupContract.get_owner_account_id();
-
-          case 19:
-            lockupOwnerAccountId = _context9.sent;
-            _context9.next = 22;
-            return lockupContract.get_vesting_information();
-
-          case 22:
-            vestingInformation = _context9.sent;
-            args = findProperVestingSchedule();
-
-            if (args) {
-              _context9.next = 27;
+            if (!(_ret === "continue")) {
+              _context10.next = 15;
               break;
             }
 
-            alert("The private vesting schedule does not match the hash stored in the lockup contract. Check the date format (YYYY-MM-DD), the dates, and the auth token");
-            return _context9.abrupt("return");
+            return _context10.abrupt("continue", 17);
 
-          case 27:
-            _context9.prev = 27;
-            _context9.next = 30;
-            return contract.functionCall(accountId, 'add_request', {
-              request: {
-                receiver_id: lockupAccountId,
-                actions: [funcCall("terminate_vesting", args)]
-              }
-            });
+          case 15:
+            if (!(_typeof(_ret) === "object")) {
+              _context10.next = 17;
+              break;
+            }
 
-          case 30:
-            _context9.next = 35;
+            return _context10.abrupt("return", _ret.v);
+
+          case 17:
+            _context10.next = 10;
             break;
 
-          case 32:
-            _context9.prev = 32;
-            _context9.t0 = _context9["catch"](27);
-            console.log(_context9.t0);
+          case 19:
+            _context10.next = 24;
+            break;
 
-          case 35:
+          case 21:
+            _context10.prev = 21;
+            _context10.t1 = _context10["catch"](7);
+
+            _iterator2.e(_context10.t1);
+
+          case 24:
+            _context10.prev = 24;
+
+            _iterator2.f();
+
+            return _context10.finish(24);
+
+          case 27:
           case "end":
-            return _context9.stop();
+            return _context10.stop();
         }
       }
-    }, _callee9, null, [[27, 32]]);
+    }, _callee9, null, [[7, 21, 24, 27]]);
   }));
   return _vestingPrivateTermination.apply(this, arguments);
 }
@@ -72020,12 +72188,12 @@ function setupMultisig(_x12) {
 
 function _setupMultisig() {
   _setupMultisig = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10(contract) {
-    return regeneratorRuntime.wrap(function _callee10$(_context10) {
+    return regeneratorRuntime.wrap(function _callee10$(_context11) {
       while (1) {
-        switch (_context10.prev = _context10.next) {
+        switch (_context11.prev = _context11.next) {
           case 0:
           case "end":
-            return _context10.stop();
+            return _context11.stop();
         }
       }
     }, _callee10);
@@ -72040,48 +72208,48 @@ function setupLockup(_x13) {
 function _setupLockup() {
   _setupLockup = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee11(contract) {
     var accountId, amount, duration, allowStaking;
-    return regeneratorRuntime.wrap(function _callee11$(_context11) {
+    return regeneratorRuntime.wrap(function _callee11$(_context12) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             accountId = document.querySelector('#create-lockup-account-id').value;
             amount = document.querySelector('#create-lockup-amount').value;
             duration = document.querySelector('#create-lockup-duration').value;
             allowStaking = document.querySelector('#create-lockup-staking').value;
-            _context11.next = 6;
+            _context12.next = 6;
             return utils.accountExists(window.near.connection, accountId);
 
           case 6:
-            if (_context11.sent) {
-              _context11.next = 9;
+            if (_context12.sent) {
+              _context12.next = 9;
               break;
             }
 
             alert("".concat(accountId, " doesn't exit. Create it first."));
-            return _context11.abrupt("return");
+            return _context12.abrupt("return");
 
           case 9:
             amount = utils.parseAmount(amount);
-            _context11.prev = 10;
+            _context12.prev = 10;
             duration = parseInt(duration);
-            _context11.next = 18;
+            _context12.next = 18;
             break;
 
           case 14:
-            _context11.prev = 14;
-            _context11.t0 = _context11["catch"](10);
+            _context12.prev = 14;
+            _context12.t0 = _context12["catch"](10);
             alert("Failed to parse duration ".concat(duration));
-            return _context11.abrupt("return");
+            return _context12.abrupt("return");
 
           case 18:
             // Days to nano seconds.
             duration = duration * 60 * 60 * 24 * 1000 * 1000 * 1000;
-            _context11.next = 21;
+            _context12.next = 21;
             return (0, _lockup.deployLockup)(contract, accountId, amount, duration, allowStaking);
 
           case 21:
           case "end":
-            return _context11.stop();
+            return _context12.stop();
         }
       }
     }, _callee11, null, [[10, 14]]);
@@ -72096,126 +72264,129 @@ function submitRequest(_x14, _x15) {
 function _submitRequest() {
   _submitRequest = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12(accountId, requestKind) {
     var contract;
-    return regeneratorRuntime.wrap(function _callee12$(_context12) {
+    return regeneratorRuntime.wrap(function _callee12$(_context13) {
       while (1) {
-        switch (_context12.prev = _context12.next) {
+        switch (_context13.prev = _context13.next) {
           case 0:
-            _context12.next = 2;
+            _context13.next = 2;
             return window.near.account(accountId);
 
           case 2:
-            contract = _context12.sent;
-            _context12.prev = 3;
+            contract = _context13.sent;
+            _context13.prev = 3;
+            _context13.next = 6;
+            return setAccountSigner(contract);
 
+          case 6:
             if (!(requestKind === "add_key" || requestKind === "add_request_key")) {
-              _context12.next = 9;
+              _context13.next = 11;
               break;
             }
 
-            _context12.next = 7;
+            _context13.next = 9;
             return addKey(contract, requestKind === "add_request_key");
 
-          case 7:
-            _context12.next = 40;
+          case 9:
+            _context13.next = 42;
             break;
 
-          case 9:
+          case 11:
             if (!(requestKind === "transfer" || requestKind === "transfer_lockup")) {
-              _context12.next = 14;
+              _context13.next = 16;
               break;
             }
 
-            _context12.next = 12;
+            _context13.next = 14;
             return transfer(contract, requestKind === "transfer_lockup");
 
-          case 12:
-            _context12.next = 40;
+          case 14:
+            _context13.next = 42;
             break;
 
-          case 14:
+          case 16:
             if (!(requestKind === "num_confirmations")) {
-              _context12.next = 19;
+              _context13.next = 21;
               break;
             }
 
-            _context12.next = 17;
+            _context13.next = 19;
             return setNumConfirmations(contract);
 
-          case 17:
-            _context12.next = 40;
+          case 19:
+            _context13.next = 42;
             break;
 
-          case 19:
-            if (!(requestKind === "terminate_vesting" || requestKind === "termination_withdraw")) {
-              _context12.next = 24;
+          case 21:
+            if (!(requestKind === "terminate_vesting" || requestKind === "termination_unstake" || requestKind === "termination_withdraw")) {
+              _context13.next = 26;
               break;
             }
 
-            _context12.next = 22;
+            _context13.next = 24;
             return vestingTermination(contract, requestKind);
 
-          case 22:
-            _context12.next = 40;
+          case 24:
+            _context13.next = 42;
             break;
 
-          case 24:
+          case 26:
             if (!(requestKind === "terminate_private_vesting")) {
-              _context12.next = 29;
+              _context13.next = 31;
               break;
             }
 
-            _context12.next = 27;
+            _context13.next = 29;
             return vestingPrivateTermination(contract, requestKind);
 
-          case 27:
-            _context12.next = 40;
+          case 29:
+            _context13.next = 42;
             break;
 
-          case 29:
+          case 31:
             if (!(requestKind === "multisig")) {
-              _context12.next = 34;
+              _context13.next = 36;
               break;
             }
 
-            _context12.next = 32;
+            _context13.next = 34;
             return setupMultisig(contract);
 
-          case 32:
-            _context12.next = 40;
+          case 34:
+            _context13.next = 42;
             break;
 
-          case 34:
+          case 36:
             if (!(requestKind === "lockup")) {
-              _context12.next = 39;
+              _context13.next = 41;
               break;
             }
 
-            _context12.next = 37;
+            _context13.next = 39;
             return setupLockup(contract);
 
-          case 37:
-            _context12.next = 40;
+          case 39:
+            _context13.next = 42;
             break;
 
-          case 39:
+          case 41:
             alert("Unkonwn request kind: ".concat(requestKind));
 
-          case 40:
-            _context12.next = 46;
+          case 42:
+            _context13.next = 48;
             break;
 
-          case 42:
-            _context12.prev = 42;
-            _context12.t0 = _context12["catch"](3);
-            console.log(_context12.t0);
-            alert(_context12.t0);
+          case 44:
+            _context13.prev = 44;
+            _context13.t0 = _context13["catch"](3);
+            console.log(_context13.t0);
+            alert(_context13.t0);
 
-          case 46:
+          case 48:
           case "end":
-            return _context12.stop();
+            return _context13.stop();
         }
       }
-    }, _callee12, null, [[3, 42]]);
+    }, _callee12, null, [[3, 44]]);
   }));
   return _submitRequest.apply(this, arguments);
 }
@@ -73283,7 +73454,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51720" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53665" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
