@@ -174,6 +174,29 @@ async function setNumConfirmations(contract) {
   });
 }
 
+async function setActiveRequestsLimit(contract) {
+  let accountId = contract.accountId;
+  let activeRequestsLimit = document.querySelector('#active-requests-limit').value;
+  try {
+    activeRequestsLimit = parseInt(activeRequestsLimit);
+  } catch (error) {
+    alert(error);
+    return;
+  }
+  if (activeRequestsLimit < 1 || activeRequestsLimit > 100) {
+    alert(`Error: Set number of active requests in a range of 1..100`);
+    return;
+  }
+  await contract.functionCall(accountId, 'add_request', {
+    request: {
+      receiver_id: accountId,
+      actions: [
+        {type: "SetActiveRequestsLimit", active_requests_limit: activeRequestsLimit}
+      ]
+    }
+  });
+}
+
 async function vestingTermination(contract, requestKind) {
   let accountId = contract.accountId;
   let lockupAccountIds = document.querySelector('#lockup-account-ids').value.split(/\r?\n/);
@@ -402,6 +425,8 @@ async function submitRequest(accountId, requestKind) {
       await transfer(contract, requestKind === "transfer_lockup");
     } else if (requestKind === "num_confirmations") {
       await setNumConfirmations(contract);
+    } else if (requestKind === "set_active_requests_limit") {
+      await setActiveRequestsLimit(contract);
     } else if (requestKind === "terminate_vesting" || requestKind === "termination_unstake" || requestKind === "termination_withdraw") {
       await vestingTermination(contract, requestKind);
     } else if (requestKind === "terminate_private_vesting") {
