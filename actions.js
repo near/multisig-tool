@@ -218,7 +218,11 @@ async function vestingTermination(contract, requestKind) {
       }
     );
     let lockupVestingInformation = await lockupContract.get_vesting_information();
-    
+    if (lockupVestingInformation === "None") {
+      alert(`The lockup ${lockupAccountId} does not have a vesting schedule (either terminated before or never had one)`);
+      continue;
+    }
+
     if (requestKind === "terminate_vesting") {
       if (!('VestingSchedule' in lockupVestingInformation)) {
         alert(`Account ${lockupAccountId} has no public vesting schedule (either it was terminated before, or it is in termination process, or it has private vesting)`)
@@ -330,6 +334,10 @@ async function vestingPrivateTermination(contract, requestKind) {
 
     let lockupOwnerAccountId = await lockupContract.get_owner_account_id();
     let vestingInformation = await lockupContract.get_vesting_information();
+    if (vestingInformation === "None") {
+      alert(`The lockup ${lockupAccountId} does not have a vesting schedule (either terminated before or never had one)`);
+      continue;
+    }
 
     function findProperVestingSchedule() {
       // According to near-claims, user might have either specified the owner
