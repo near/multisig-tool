@@ -71825,7 +71825,7 @@ function _vestingTermination() {
 
           case 5:
             if ((_step = _iterator.n()).done) {
-              _context9.next = 46;
+              _context9.next = 49;
               break;
             }
 
@@ -71840,7 +71840,7 @@ function _vestingTermination() {
             }
 
             alert("Account ".concat(lockupAccountId, " doesn't exist"));
-            return _context9.abrupt("continue", 44);
+            return _context9.abrupt("continue", 47);
 
           case 12:
             console.log("Vesting ".concat(requestKind, " for ").concat(lockupAccountId));
@@ -71858,21 +71858,30 @@ function _vestingTermination() {
           case 19:
             lockupVestingInformation = _context9.sent;
 
+            if (!(lockupVestingInformation === "None")) {
+              _context9.next = 23;
+              break;
+            }
+
+            alert("The lockup ".concat(lockupAccountId, " does not have a vesting schedule (either terminated before or never had one)"));
+            return _context9.abrupt("continue", 47);
+
+          case 23:
             if (!(requestKind === "terminate_vesting")) {
-              _context9.next = 28;
+              _context9.next = 31;
               break;
             }
 
             if ('VestingSchedule' in lockupVestingInformation) {
-              _context9.next = 24;
+              _context9.next = 27;
               break;
             }
 
             alert("Account ".concat(lockupAccountId, " has no public vesting schedule (either it was terminated before, or it is in termination process, or it has private vesting)"));
-            return _context9.abrupt("continue", 44);
+            return _context9.abrupt("continue", 47);
 
-          case 24:
-            _context9.next = 26;
+          case 27:
+            _context9.next = 29;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -71880,37 +71889,37 @@ function _vestingTermination() {
               }
             });
 
-          case 26:
-            _context9.next = 44;
+          case 29:
+            _context9.next = 47;
             break;
 
-          case 28:
+          case 31:
             if (!(requestKind === "termination_withdraw")) {
-              _context9.next = 44;
+              _context9.next = 47;
               break;
             }
 
             if ('Terminating' in lockupVestingInformation) {
-              _context9.next = 32;
+              _context9.next = 35;
               break;
             }
 
             alert("Vesting termination is not initialized on ".concat(lockupAccountId));
-            return _context9.abrupt("continue", 44);
+            return _context9.abrupt("continue", 47);
 
-          case 32:
-            _context9.next = 34;
+          case 35:
+            _context9.next = 37;
             return lockupContract.get_termination_status();
 
-          case 34:
+          case 37:
             lockupTerminationStatus = _context9.sent;
 
             if (!(lockupTerminationStatus === 'VestingTerminatedWithDeficit' || lockupTerminationStatus === 'EverythingUnstaked')) {
-              _context9.next = 41;
+              _context9.next = 44;
               break;
             }
 
-            _context9.next = 38;
+            _context9.next = 41;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -71918,18 +71927,18 @@ function _vestingTermination() {
               }
             });
 
-          case 38:
+          case 41:
             if (lockupTerminationStatus === 'VestingTerminatedWithDeficit') {
               alert("Account ".concat(lockupAccountId, " will the tokens unstaked after confirmation (get back to \"Try Withdraw\" in 2 days after the confirmation)"));
             } else {
               alert("Account ".concat(lockupAccountId, " will get the tokens withdrawn from the staking pool after confirmation (get back to \"Try Withdraw\" immediately after the confirmation to withdraw the funds back to foundation)"));
             }
 
-            _context9.next = 44;
+            _context9.next = 47;
             break;
 
-          case 41:
-            _context9.next = 43;
+          case 44:
+            _context9.next = 46;
             return contract.functionCall(accountId, 'add_request', {
               request: {
                 receiver_id: lockupAccountId,
@@ -71939,36 +71948,36 @@ function _vestingTermination() {
               }
             });
 
-          case 43:
+          case 46:
             alert("Account ".concat(lockupAccountId, " will get the tokens withdrawn to foundation and the termination will be completed after confirmation!"));
 
-          case 44:
+          case 47:
             _context9.next = 5;
             break;
 
-          case 46:
-            _context9.next = 51;
+          case 49:
+            _context9.next = 54;
             break;
 
-          case 48:
-            _context9.prev = 48;
+          case 51:
+            _context9.prev = 51;
             _context9.t0 = _context9["catch"](3);
 
             _iterator.e(_context9.t0);
 
-          case 51:
-            _context9.prev = 51;
+          case 54:
+            _context9.prev = 54;
 
             _iterator.f();
 
-            return _context9.finish(51);
+            return _context9.finish(54);
 
-          case 54:
+          case 57:
           case "end":
             return _context9.stop();
         }
       }
-    }, _callee9, null, [[3, 48, 51, 54]]);
+    }, _callee9, null, [[3, 51, 54, 57]]);
   }));
   return _vestingTermination.apply(this, arguments);
 }
@@ -72107,10 +72116,20 @@ function _vestingPrivateTermination() {
 
                     case 17:
                       vestingInformation = _context10.sent;
+
+                      if (!(vestingInformation === "None")) {
+                        _context10.next = 21;
+                        break;
+                      }
+
+                      alert("The lockup ".concat(lockupAccountId, " does not have a vesting schedule (either terminated before or never had one)"));
+                      return _context10.abrupt("return", "continue");
+
+                    case 21:
                       args = findProperVestingSchedule();
 
                       if (args) {
-                        _context10.next = 22;
+                        _context10.next = 25;
                         break;
                       }
 
@@ -72119,9 +72138,9 @@ function _vestingPrivateTermination() {
                         v: void 0
                       });
 
-                    case 22:
-                      _context10.prev = 22;
-                      _context10.next = 25;
+                    case 25:
+                      _context10.prev = 25;
+                      _context10.next = 28;
                       return contract.functionCall(accountId, 'add_request', {
                         request: {
                           receiver_id: lockupAccountId,
@@ -72129,21 +72148,21 @@ function _vestingPrivateTermination() {
                         }
                       });
 
-                    case 25:
-                      _context10.next = 30;
+                    case 28:
+                      _context10.next = 33;
                       break;
 
-                    case 27:
-                      _context10.prev = 27;
-                      _context10.t0 = _context10["catch"](22);
+                    case 30:
+                      _context10.prev = 30;
+                      _context10.t0 = _context10["catch"](25);
                       console.log(_context10.t0);
 
-                    case 30:
+                    case 33:
                     case "end":
                       return _context10.stop();
                   }
                 }
-              }, _loop, null, [[22, 27]]);
+              }, _loop, null, [[25, 30]]);
             });
 
             _iterator2.s();
@@ -73487,7 +73506,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59905" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65405" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

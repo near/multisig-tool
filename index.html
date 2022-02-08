@@ -1,17 +1,153 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title>Multisig Tool</title><link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet"><link rel="stylesheet" href="style.afecc5fb.css"><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script><script src="script.e18588a2.js" defer></script></head><body> <div class="container fluid"> <div class="row"> <div class="col-md-8 col-xs-12 mx-auto"> <div class="card"> <div class="card-body"> <h2 class="card-title text-center">Tool to manage multisigs</h2> <hr> <p class="mb-0 text-center"> This is temporary until NEAR Wallet adds this functionality. Version 0.1.4 </p> </div> </div> <br> <div class="card"> <div class="card-body"> <h5 class="card-title">Keys</h5> <p class="card-text"> <ul class="list-group list-group-flush"> <script id="template-keys" type="x-tmpl-mustache" style="flex-wrap:wrap;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Multisig Tool</title>
+  <!-- Font Awesome -->
+  <link href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+  <!-- MDB -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.css" rel="stylesheet">
+  <!-- import the webpage's stylesheet -->
+  <link rel="stylesheet" href="/style.e308ff8e.css">
+
+  <!-- import the webpage's javascript file -->
+  <!-- MDB -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/1.0.0/mdb.min.js"></script>
+  <script src="/script.75da7f30.js" defer=""></script>
+<script src="/style.e308ff8e.js"></script></head>
+<body>
+<div class="container fluid">
+  <div class="row">
+    <div class="col-md-8 col-xs-12 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title text-center">Tool to manage multisigs</h2>
+          <hr>
+          <p class="mb-0 text-center">
+            This is temporary until NEAR Wallet adds this functionality.
+            Version 0.1.4
+          </p>
+        </div>
+      </div>
+      <br>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Keys</h5>
+          <p class="card-text">
+          <ul class="list-group list-group-flush">
+            <script id="template-keys" type="x-tmpl-mustache" style="flex-wrap: wrap;">
               {{#keys}}
                   <li class="list-group-item"> <input class="form-check-input mr-1" type="checkbox" value="" aria-label="{{ publicKey }}
               " /> {{ publicKey }} {{ path }}</li>
               {{/keys}}
 
 
-            </script> </ul> </p> <div class="mb-4 row"> <div class="col d-flex w-100"> <div class="form-outline mb-4 w-100"> <input class="form-control" type="text" id="path"> <label class="form-label" for="path">Enter Ledger path</label> </div> </div> <div class="col"> <div> <button type="button" class="btn btn-primary" id="addPathBtn" data-toggle="modal" data-target="#ledgerModal" onclick="addPath()">Add </button> </div> </div> <div class="text-danger" id="keysError"></div> </div> <div id="keys"></div>  <div class="fade modal" id="ledgerModal" tabindex="-1" aria-labelledby="ledgerModalLabel" aria-hidden="true"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title" id="ledgerModalLabel">Adding Ledger path</h5> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body"> Please connect your ledger, go to NEAR app and accept request, then click on 'Continue' </div> <div class="modal-footer"> <button type="button" data-dismiss="modal" class="btn btn-primary">Continue</button> </div> </div> </div> </div> <div class="mb-4 row"> <div class="col d-flex w-100"> <div class="form-outline mb-4 w-100"> <input class="form-control" type="text" id="private-key" autocomplete="off"> <label class="form-label" for="path">OR use raw private key (e.g. when transaction is too big for Ledger device)</label> </div> </div> </div> <div class="mb-4 row"> <div class="col d-flex w-100"> <div class="form-outline mb-4 w-100"> <input class="form-control" type="text" id="seed-phrase" autocomplete="off"> <input class="form-control" type="text" id="seed-path" value="m/44'/397'/0'"> <label class="form-label" for="path">OR use master seed phrase with seed path (e.g. when transaction is too big for Ledger device)</label> </div> </div> </div> </div> </div> <br> <div class="card"> <div class="card-body"> <h5 class="card-title">Select or Add Account</h5> <div id="accounts"></div> <p class="card-text"> <ul class="list-group list-group-flush"> <script id="template1" type="x-tmpl-mustache">
+            </script>
+          </ul>
+          </p>
+          <div class="row mb-4">
+            <div class="col d-flex w-100">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control " type="text" id="path">
+                <label class="form-label" for="path">Enter Ledger path</label>
+              </div>
+            </div>
+            <div class="col">
+              <div>
+                <button type="button" class="btn btn-primary" id="addPathBtn" data-toggle="modal" data-target="#ledgerModal" onclick="addPath()">Add
+                </button>
+              </div>
+            </div>
+            <div class="text-danger" id="keysError"></div>
+          </div>
+          <div id="keys"></div>
+          <!-- Modal -->
+          <div class="modal fade" id="ledgerModal" tabindex="-1" aria-labelledby="ledgerModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="ledgerModalLabel">Adding Ledger path</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Please connect your ledger, go to NEAR app and accept request, then click on 'Continue'
+                </div>
+                <div class="modal-footer">
+                  <button type="button" data-dismiss="modal" class="btn btn-primary">Continue</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col d-flex w-100">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control " type="text" id="private-key" autocomplete="off">
+                <label class="form-label" for="path">OR use raw private key (e.g. when transaction is too big for Ledger device)</label>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-4">
+            <div class="col d-flex w-100">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control " type="text" id="seed-phrase" autocomplete="off">
+                <input class="form-control " type="text" id="seed-path" value="m/44'/397'/0'">
+                <label class="form-label" for="path">OR use master seed phrase with seed path (e.g. when transaction is too big for Ledger device)</label>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+      <br>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Select or Add Account</h5>
+          <div id="accounts"></div>
+
+          <p class="card-text">
+          <ul class="list-group list-group-flush">
+            <script id="template1" type="x-tmpl-mustache">
               {{#accounts}}
                   <li class="list-group-item {{ active }}"> <a href="#{{ accountId }}">{{ accountId }}</a> {{ amount }}</li>
               {{/accounts}}
 
 
-            </script> </ul> </p> <div class="mb-4 row"> <div class="col d-flex w-100"> <div class="form-outline mb-4 w-100"> <input class="form-control" type="text" id="account"> <label class="form-label" for="account">Enter account</label> </div> </div> <div class="col"> <div> <button type="button" class="btn btn-primary" onclick="addAccount()">Add</button> </div> </div> </div> </div> </div> <br> <script id="template2" type="x-tmpl-mustache" style="word-wrap:break-word;">
+            </script>
+          </ul>
+          </p>
+          <div class="row mb-4">
+            <div class="col d-flex w-100">
+              <div class="form-outline mb-4 w-100">
+                <input class="form-control" type="text" id="account">
+                <label class="form-label" for="account">Enter account</label>
+              </div>
+            </div>
+            <div class="col">
+              <div>
+                <button type="button" class="btn btn-primary" onclick="addAccount()">Add</button>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <br>
+
+      <script id="template2" type="x-tmpl-mustache" style="word-wrap: break-word;">
       <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}/staking'">Staking</button>
       <hr/>
       <div class="card">
@@ -240,7 +376,61 @@
       </div>
 
 
-      </script>  <script id="template-staking" type="x-tmpl-mustache">
+      </script>
+
+      <!--
+                <p>Create new multisig account:</p>
+
+                <div class="row mb-4 justify-content-left">
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="multisig-account-id" placeholder="Account Id" />
+                      <label class="form-label" for="multisig-account-id">Account Id</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 text-left justify-content-center">
+                      <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'multisig')">Create multisig</button>
+                  </div>
+                </div>
+
+                <hr />
+                <br />
+
+                <p>Deploy lockup:</p>
+
+                <div class="row mb-4 justify-content-left">
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="create-lockup-account-id" placeholder="Owner account for lockup contract" />
+                      <label class="form-label" for="create-lockup-account-id">Owner account for lockup contract</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="create-lockup-amount" placeholder="Lockup amount in NEAR" />
+                      <label class="form-label" for="create-lockup-amount">Lockup amount in NEAR</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input class="form-control" type="text" id="create-lockup-duration" placeholder="Lockup duration (in days)" />
+                      <label class="form-label" for="create-lockup-duration">Lockup duration (in days)</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 d-flex">
+                    <div class="form-outline mb-4 w-100">
+                      <input type="checkbox" id="create-lockup-staking" placeholder="" checked />
+                      <label for="create-lockup-staking">Enable staking</label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6 text-left justify-content-center">
+                      <button type="button" class="btn btn-danger" onclick="submitRequest('{{ accountId }}', 'lockup')">Deploy lockup</button>
+                  </div>
+                </div>
+
+                -->
+
+      <script id="template-staking" type="x-tmpl-mustache">
       <button type="button" class="btn btn-primary" onclick="window.location.href='#{{ accountId }}'">Back</button>
         <hr/>
         <div class="card">
@@ -308,4 +498,35 @@
         </div>
 
 
-      </script> <div id="requests"></div> <footer class="bg-light text-center text-lg-left">  <div class="p-3 text-center" style="background-color:rgba(0,0,0,.2);"> © 2021 Copyright: <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a> </div>  </footer> </div> </div> </div> </body></html><script>function n(){document.querySelectorAll(".form-outline").forEach(function(n){new window.mdb.Input(n).init()})}window.initInputs=n,document.addEventListener("DOMContentLoaded",function(){n()});</script>
+      </script>
+
+      <div id="requests"></div>
+
+      <footer class="bg-light text-center text-lg-left">
+
+        <!-- Copyright -->
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+          © 2021 Copyright:
+          <a class="text-dark" target="_blank" href="https://near.org/">Near.org</a>
+        </div>
+        <!-- Copyright -->
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
+
+<script>function initInputs() {
+  document.querySelectorAll('.form-outline').forEach(function (formOutline) {
+    new window.mdb.Input(formOutline).init();
+  });
+}
+
+window.initInputs = initInputs;
+document.addEventListener("DOMContentLoaded", function () {
+  initInputs();
+});</script>
