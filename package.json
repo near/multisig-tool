@@ -9,7 +9,7 @@
     "bs58": "^4.0.1",
     "js-sha256": "^0.9.0",
     "mustache": "^4.2.0",
-    "near-api-js": "^0.43.1",
+    "near-api-js": "^0.45.1",
     "near-ledger-js": "^0.2.0",
     "near-seed-phrase": "^0.2.0",
     "parcel-bundler": "^1.12.5",
