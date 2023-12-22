@@ -4,7 +4,7 @@
   },
   "dependencies": {
     "@ledgerhq/hw-transport-u2f": "^5.36.0-deprecated",
-    "@ledgerhq/hw-transport-webhid": "^6.3.0",
+    "@ledgerhq/hw-transport-webhid": "^6.28.0",
     "@ledgerhq/hw-transport-webusb": "^6.3.0",
     "bs58": "^4.0.1",
     "js-sha256": "^0.9.0",
